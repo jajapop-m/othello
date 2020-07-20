@@ -17,7 +17,6 @@ class Board
   def put_piece(i,j)
     i -= 1
     j -= 1
-    p my_color
     field[i][j] = my_color
     turn_pieces(i,j)
   end
@@ -25,36 +24,33 @@ class Board
   def turn_pieces(i,j)
     @change_color_stocks = []
     ary = []
-    p [i,j]
-    # b_count = check_bottom(i,j,ary)
     check_line(i,j,1,0,ary)
-    p "1",change_color_stocks
-    # top =    check_top(i,j,ary)
     check_line(i,j,-1,0,ary)
-    p "2",change_color_stocks
-    # right =  check_right(i,j,ary)
     check_line(i,j,0,1,ary)
-    p "3",change_color_stocks
-    # left =   check_left(i,j,ary)
     check_line(i,j,0,-1,ary)
-    p "4",change_color_stocks
-    change_color_stocks.each do |i,j|
-      field[i][j] = my_color
+    check_line(i,j,1,1,ary)
+    check_line(i,j,1,-1,ary)
+    check_line(i,j,-1,1,ary)
+    check_line(i,j,-1,-1,ary)
+    change_color_stocks.each do |a|
+      a.each_slice(2) do |i,j|
+        field[i][j] = my_color
+      end
     end
   end
 
   def check_line(i,j,a,b,ary)
-    return ary.clear unless validate(i+a,j+b)
+    # ary << [i,j]
+    return ary.clear if !within_range(i+a,j+b) || field[i+a][j+b] == :none
     if field[i+a][j+b] == my_color
-      @change_color_stocks << ary.flatten(1)
-      p [i,j,a,b,i+a,j+b,field[i+a][j+b]]
+      @change_color_stocks << ary.flatten
       return change_color_stocks.length
     end
     ary << [i+a,j+b]
     check_line(i+a,j+b,a,b,ary)
   end
 
-  def validate(i,j)
+  def within_range(i,j)
     i<8 && j<8 && i>=0 && j>=0
   end
 
