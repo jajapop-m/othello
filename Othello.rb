@@ -24,12 +24,6 @@ class Board
     @my_color, @enemy_color = enemy_color, my_color
   end
 
-  Array.class_eval do
-    def remove_from_empty_cells(i,j)
-      self.delete([i,j])
-    end
-  end
-
   def put_piece(i,j)
     i -= 1
     j -= 1
@@ -40,6 +34,10 @@ class Board
     else
       puts "そこには置けません"
     end
+  end
+
+  def auto_put_piece(i,j)
+
   end
 
   def turn_pieces(i,j)
@@ -54,14 +52,14 @@ class Board
   def gathering_turnable_pieces(i,j)
     @change_color_stocks = []
     ary = []
-    check_line(i,j,1,0,ary)
-    check_line(i,j,-1,0,ary)
-    check_line(i,j,0,1,ary)
-    check_line(i,j,0,-1,ary)
-    check_line(i,j,1,1,ary)
-    check_line(i,j,1,-1,ary)
-    check_line(i,j,-1,1,ary)
-    check_line(i,j,-1,-1,ary)
+    check_line(i,j,1,0,ary)   if within_range(i+1,j) && field[i+1][j] == enemy_color
+    check_line(i,j,-1,0,ary)  if within_range(i-1,j) && field[i-1][j] == enemy_color
+    check_line(i,j,0,1,ary)   if within_range(i,j+1) && field[i][j+1] == enemy_color
+    check_line(i,j,0,-1,ary)  if within_range(i,j-1) && field[i][j-1] == enemy_color
+    check_line(i,j,1,1,ary)   if within_range(i+1,j+1) && field[i+1][j+1] == enemy_color
+    check_line(i,j,1,-1,ary)  if within_range(i+1,j-1) && field[i+1][j-1] == enemy_color
+    check_line(i,j,-1,1,ary)  if within_range(i-1,j+1) && field[i-1][j+1] == enemy_color
+    check_line(i,j,-1,-1,ary) if within_range(i-1,j-1) && field[i-1][j-1] == enemy_color
     @change_color_stocks
   end
 
@@ -79,19 +77,48 @@ class Board
   end
 
   def putable?(i,j)
-    !!check_putable_cells.find_index([i,j])
+    !!check_putable_cells[0].find_index([i,j])
   end
 
   def check_putable_cells
     putable_cells = []
+    max = [0]
     empty_cells.each do |i,j|
       count = 0
       gathering_turnable_pieces(i,j).each do |piece|
         count += 1 unless piece.empty?
       end
+      if max[0] <= count
+        max[0] = count
+        max << [count,i,j]
+      end
       putable_cells << [i,j] if count > 0
     end
-    putable_cells
+    m = max.shift
+    max.delete_if{|n| n[0]!=m}
+    p putable_cells
+    [putable_cells,max]
+  end
+
+  def game_situation
+    black,white = 0,0
+    field.each do |line|
+      line.each do |cell|
+        black += 1 if cell == :black
+        white += 1 if cell == :white
+      end
+    end
+    if check_putable_cells[0].empty?
+      if black < white
+        puts "黒:#{black},白:#{white} 白の勝ち".center(17)
+      elsif black > white
+        puts "黒:#{black},白:#{white} 黒の勝ち".center(17)
+      else
+        puts "黒:#{black},白:#{white} 引き分け".center(17)
+      end
+    else
+      puts "黒:#{black},白:#{white}".center(17)
+    end
   end
 
   def puts_field
@@ -133,12 +160,19 @@ class Othello
     board.puts_field
   end
 
-  def one_turn
+  def man_vs_man
     i,j = gets.split.map(&:to_i)
     board.put_piece(i,j)
-    board.puts_field
     board.next_turn
-    one_turn
+    board.game_situation
+    board.puts_field
+    man_vs_man
+  end
+end
+
+class Array
+  def remove_from_empty_cells(i,j)
+    self.delete([i,j])
   end
 end
 
@@ -147,4 +181,4 @@ end
 # i,j = gets.split.map(&:to_i)
 # board.put_piece(i,j)
 # board.puts_field
-Othello.new.one_turn
+Othello.new.man_vs_man
