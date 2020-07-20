@@ -9,8 +9,8 @@ class Board
     @my_color = :black
     @enemy_color = :white
     @empty_cells = []
-    for i in 0..8
-      for j in 0..8
+    for i in 0..7
+      for j in 0..7
         empty_cells << [i,j]
       end
     end
@@ -25,6 +25,7 @@ class Board
   end
 
   def put_piece(i,j)
+    p empty_cells
     i -= 1
     j -= 1
     if putable?(i,j)
@@ -36,8 +37,11 @@ class Board
     end
   end
 
-  def auto_put_piece(i,j)
-
+  def auto_put_piece
+    sample = check_putable_cells[1].sample
+    p sample
+    i,j = sample[1],sample[2]
+    put_piece(i+1,j+1)
   end
 
   def turn_pieces(i,j)
@@ -96,7 +100,6 @@ class Board
     end
     m = max.shift
     max.delete_if{|n| n[0]!=m}
-    p putable_cells
     [putable_cells,max]
   end
 
@@ -116,6 +119,7 @@ class Board
       else
         puts "黒:#{black},白:#{white} 引き分け".center(17)
       end
+      exit
     else
       puts "黒:#{black},白:#{white}".center(17)
     end
@@ -168,6 +172,26 @@ class Othello
     board.puts_field
     man_vs_man
   end
+
+  def man_vs_computer
+    i,j = gets.split.map(&:to_i)
+    board.put_piece(i,j)
+    board.next_turn
+    board.game_situation
+    board.auto_put_piece
+    board.next_turn
+    board.game_situation
+    board.puts_field
+    man_vs_computer
+  end
+
+  def computer_vs_computer
+    board.auto_put_piece
+    board.next_turn
+    board.game_situation
+    board.puts_field
+    computer_vs_computer
+  end
 end
 
 class Array
@@ -181,4 +205,5 @@ end
 # i,j = gets.split.map(&:to_i)
 # board.put_piece(i,j)
 # board.puts_field
-Othello.new.man_vs_man
+Othello.new.computer_vs_computer
+Othello.new.man_vs_computer
