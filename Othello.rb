@@ -167,42 +167,89 @@ end
 class Othello
   attr_accessor :board
   def initialize
+    puts "オセロゲーム".center(17)
     @board = Board.new
+    mode_select
+  end
+
+  def mode_select
+    puts "どれにしますか？番号を入力して下さい"
+    puts "1.人対コンピュータ, 2.人対人, 3.コンピュータ対コンピュータ"
+    i = gets.to_i
+    case i
+    when 1
+      black_or_white
+    when 2
+      board.puts_field
+      man_vs_man
+    when 3
+      board.puts_field
+      computer_vs_computer
+    else
+      puts "もう一度入力して下さい。"
+      return mode_select
+    end
+  end
+
+  def black_or_white
+    puts "どちらにしますか？番号を入力して下さい"
+    puts "1 黒番, 2 白番"
+    i = gets.to_i
+    board.puts_field
+    case i
+    when 1
+      man_vs_computer
+    when 2
+      computer_vs_man
+    else
+      puts "もう一度入力して下さい"
+      return black_or_white
+    end
+  end
+
+  def man_vs_man
+    man_turn
+    man_vs_man
+  end
+
+  def man_vs_computer
+    man_turn
+    return board.puts_field unless computer_turn
+    man_vs_computer
+  end
+
+  def computer_vs_man
+    return board.puts_field unless computer_turn
+    return board.puts_field unless man_turn
+    man_vs_computer
+  end
+
+  def computer_vs_computer
+    return board.puts_field unless computer_turn
+    computer_vs_computer
+  end
+
+  def man_turn
+    put_request
+    board.next_turn
+    return false if board.game_situation
+    board.puts_field
+  end
+
+  def computer_turn
+    board.auto_put_piece
+    board.next_turn
+    return false if board.game_situation
     board.puts_field
   end
 
   def put_request
     i,j = gets.split.map(&:to_i)
+    if i.nil? || j.nil?
+      puts "もう一度入力して下さい"
+      return put_request
+    end
     put_request unless board.put_piece(i,j)
-  end
-
-  def man_vs_man
-    put_request
-    board.next_turn
-    board.game_situation
-    board.puts_field
-    man_vs_man
-  end
-
-  def man_vs_computer
-    p board.check_putable_cells[0]
-    put_request
-    board.next_turn
-    return board.puts_field if board.game_situation
-    board.puts_field
-    board.auto_put_piece
-    board.next_turn
-    return board.puts_field if board.game_situation
-    board.puts_field
-    man_vs_computer
-  end
-
-  def computer_vs_computer
-    board.auto_put_piece
-    board.next_turn
-    return board.puts_field if board.game_situation
-    board.puts_field
-    computer_vs_computer
   end
 end
 
@@ -218,4 +265,4 @@ end
 # board.put_piece(i,j)
 # board.puts_field
 # Othello.new.computer_vs_computer
-Othello.new.man_vs_computer
+Othello.new
