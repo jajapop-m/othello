@@ -25,7 +25,6 @@ class Board
   end
 
   def put_piece(i,j)
-    p empty_cells
     i -= 1
     j -= 1
     if putable?(i,j)
@@ -34,12 +33,13 @@ class Board
       empty_cells.remove_from_empty_cells(i,j)
     else
       puts "そこには置けません"
+      return false
     end
+    true
   end
 
   def auto_put_piece
     sample = check_putable_cells[1].sample
-    p sample
     i,j = sample[1],sample[2]
     put_piece(i+1,j+1)
   end
@@ -112,17 +112,23 @@ class Board
       end
     end
     if check_putable_cells[0].empty?
-      if black < white
-        puts "黒:#{black},白:#{white} 白の勝ち".center(17)
-      elsif black > white
-        puts "黒:#{black},白:#{white} 黒の勝ち".center(17)
+      next_turn
+      if check_putable_cells[0].empty?
+        if black < white
+          puts "黒:#{black},白:#{white} 白の勝ち".center(17)
+        elsif black > white
+          puts "黒:#{black},白:#{white} 黒の勝ち".center(17)
+        else
+          puts "黒:#{black},白:#{white} 引き分け".center(17)
+        end
+        return true
       else
-        puts "黒:#{black},白:#{white} 引き分け".center(17)
+        puts "パスです。"
       end
-      exit
     else
       puts "黒:#{black},白:#{white}".center(17)
     end
+    false
   end
 
   def puts_field
@@ -164,9 +170,13 @@ class Othello
     board.puts_field
   end
 
-  def man_vs_man
+  def put_request
     i,j = gets.split.map(&:to_i)
-    board.put_piece(i,j)
+    put_request unless board.put_piece(i,j)
+  end
+
+  def man_vs_man
+    put_request
     board.next_turn
     board.game_situation
     board.puts_field
@@ -174,13 +184,13 @@ class Othello
   end
 
   def man_vs_computer
-    i,j = gets.split.map(&:to_i)
-    board.put_piece(i,j)
+    put_request
     board.next_turn
-    board.game_situation
+    return board.puts_field if board.game_situation
+    board.puts_field
     board.auto_put_piece
     board.next_turn
-    board.game_situation
+    return board.puts_field if board.game_situation
     board.puts_field
     man_vs_computer
   end
@@ -188,7 +198,7 @@ class Othello
   def computer_vs_computer
     board.auto_put_piece
     board.next_turn
-    board.game_situation
+    return board.puts_field if board.game_situation
     board.puts_field
     computer_vs_computer
   end
@@ -205,5 +215,5 @@ end
 # i,j = gets.split.map(&:to_i)
 # board.put_piece(i,j)
 # board.puts_field
-Othello.new.computer_vs_computer
+# Othello.new.computer_vs_computer
 Othello.new.man_vs_computer
