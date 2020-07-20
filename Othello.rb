@@ -1,70 +1,57 @@
 class Board
-  attr_accessor :piece, :field, :change_color
+  attr_accessor :piece, :field, :change_color_stocks, :my_color, :enemy_color
   def initialize
     @field = Array.new(8){Array.new(8,:none)}
     field[3][3] = :black
     field[3][4] = :white
     field[4][3] = :white
     field[4][4] = :black
+    @my_color = :black
+    @enemy_color = :white
+  end
+
+  def next_turn
+    @my_color, @enemy_color = enemy_color, my_color
   end
 
   def put_piece(i,j)
     i -= 1
     j -= 1
-    field[i][j] = :black
+    p my_color
+    field[i][j] = my_color
     turn_pieces(i,j)
   end
 
   def turn_pieces(i,j)
-    @change_color = []
+    @change_color_stocks = []
     ary = []
-    b_count = check_bottom(i,j,ary)
-    top =    check_top(i,j,ary)
-    right =  check_right(i,j,ary)
-    left =   check_left(i,j,ary)
-    change_color.each do |i,j|
-      field[i][j] = :black
+    p [i,j]
+    # b_count = check_bottom(i,j,ary)
+    check_line(i,j,1,0,ary)
+    p "1",change_color_stocks
+    # top =    check_top(i,j,ary)
+    check_line(i,j,-1,0,ary)
+    p "2",change_color_stocks
+    # right =  check_right(i,j,ary)
+    check_line(i,j,0,1,ary)
+    p "3",change_color_stocks
+    # left =   check_left(i,j,ary)
+    check_line(i,j,0,-1,ary)
+    p "4",change_color_stocks
+    change_color_stocks.each do |i,j|
+      field[i][j] = my_color
     end
   end
 
-  def check_bottom(i,j,a)
-    return a.clear unless validate(i+1,j)
-    if field[i+1][j] == :black
-      change_color << a.flatten(1)
-      return change_color.length
+  def check_line(i,j,a,b,ary)
+    return ary.clear unless validate(i+a,j+b)
+    if field[i+a][j+b] == my_color
+      @change_color_stocks << ary.flatten(1)
+      p [i,j,a,b,i+a,j+b,field[i+a][j+b]]
+      return change_color_stocks.length
     end
-    a << [i+1,j]
-    check_bottom(i+1,j,a)
-  end
-
-  def check_top(i,j,a)
-    return a.clear unless validate(i-1,j)
-    if field[i-1][j] == :black
-      change_color << a.flatten(1)
-      return [change_color.length]
-    end
-    a << [i-1,j]
-    check_top(i-1,j,a)
-  end
-
-  def check_right(i,j,a)
-    return a.clear unless validate(i,j+1)
-    if field[i][j+1] == :black
-      change_color << a.flatten(1)
-      return [change_color.length]
-    end
-    a << [i,j+1]
-    check_right(i,j+1,a)
-  end
-
-  def check_left(i,j,a)
-    return a.clear unless validate(i,j-1)
-    if field[i][j-1] == :black
-      change_color << a.flatten(1)
-      return [change_color.length]
-    end
-    a << [i,j-1]
-    check_left(i,j-1,a)
+    ary << [i+a,j+b]
+    check_line(i+a,j+b,a,b,ary)
   end
 
   def validate(i,j)
@@ -104,11 +91,24 @@ class Piece
 end
 
 class Othello
+  attr_accessor :board
+  def initialize
+    @board = Board.new
+    board.puts_field
+  end
 
+  def one_turn
+    i,j = gets.split.map(&:to_i)
+    board.put_piece(i,j)
+    board.puts_field
+    board.next_turn
+    one_turn
+  end
 end
 
-board = Board.new
-board.puts_field
-i,j = gets.split.map(&:to_i)
-board.put_piece(i,j)
-board.puts_field
+# board = Board.new
+# board.puts_field
+# i,j = gets.split.map(&:to_i)
+# board.put_piece(i,j)
+# board.puts_field
+Othello.new.one_turn
