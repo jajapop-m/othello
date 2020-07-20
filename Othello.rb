@@ -124,6 +124,7 @@ class Board
         return true
       else
         puts "パスです。"
+        next_turn
       end
     else
       puts "黒:#{black},白:#{white}".center(17)
@@ -184,6 +185,7 @@ class Othello
   end
 
   def man_vs_computer
+    p board.check_putable_cells[0]
     put_request
     board.next_turn
     return board.puts_field if board.game_situation
