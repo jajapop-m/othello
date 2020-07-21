@@ -28,43 +28,19 @@ class Board
     i -= 1
     j -= 1
     if putable?(i,j)
-      field[i][j] = my_color
       turn_pieces(i,j)
+      field[i][j] = my_color
       empty_cells.remove_from_empty_cells(i,j)
     else
       puts "そこには置けません"
       return false
     end
-    true
   end
 
   def auto_put_piece
     sample = check_putable_cells[1].sample
     i,j = sample[1],sample[2]
     put_piece(i+1,j+1)
-  end
-
-  def turn_pieces(i,j)
-    stocks = gathering_turnable_pieces(i,j)
-    stocks.each do |a|
-      a.each_slice(2) do |i,j|
-        field[i][j] = my_color
-      end
-    end
-  end
-
-  def gathering_turnable_pieces(i,j)
-    @change_color_stocks = []
-    ary = []
-    check_line(i,j,1,0,ary)   if within_range(i+1,j) && field[i+1][j] == enemy_color
-    check_line(i,j,-1,0,ary)  if within_range(i-1,j) && field[i-1][j] == enemy_color
-    check_line(i,j,0,1,ary)   if within_range(i,j+1) && field[i][j+1] == enemy_color
-    check_line(i,j,0,-1,ary)  if within_range(i,j-1) && field[i][j-1] == enemy_color
-    check_line(i,j,1,1,ary)   if within_range(i+1,j+1) && field[i+1][j+1] == enemy_color
-    check_line(i,j,1,-1,ary)  if within_range(i+1,j-1) && field[i+1][j-1] == enemy_color
-    check_line(i,j,-1,1,ary)  if within_range(i-1,j+1) && field[i-1][j+1] == enemy_color
-    check_line(i,j,-1,-1,ary) if within_range(i-1,j-1) && field[i-1][j-1] == enemy_color
-    @change_color_stocks
   end
 
   def check_line(i,j,a,b,ary)
@@ -74,10 +50,6 @@ class Board
     end
     ary << [i+a,j+b]
     check_line(i+a,j+b,a,b,ary)
-  end
-
-  def within_range(i,j)
-    i<8 && j<8 && i>=0 && j>=0
   end
 
   def putable?(i,j)
@@ -111,7 +83,6 @@ class Board
         white += 1 if cell == :white
       end
     end
-    p check_putable_cells[0]
     if check_putable_cells[0].empty?
       next_turn
       if check_putable_cells[0].empty?
@@ -168,6 +139,31 @@ class Board
     end
   end
 
+  private
+
+    def turn_pieces(i,j)
+      gathering_turnable_pieces(i,j).each do |line|
+        line.each_slice(2) {|i,j| field[i][j] = my_color }
+      end
+    end
+
+    def gathering_turnable_pieces(i,j)
+      @change_color_stocks = []
+      ary = []
+      check_line(i,j,1,0,ary)   if within_range(i+1,j) && field[i+1][j] == enemy_color
+      check_line(i,j,-1,0,ary)  if within_range(i-1,j) && field[i-1][j] == enemy_color
+      check_line(i,j,0,1,ary)   if within_range(i,j+1) && field[i][j+1] == enemy_color
+      check_line(i,j,0,-1,ary)  if within_range(i,j-1) && field[i][j-1] == enemy_color
+      check_line(i,j,1,1,ary)   if within_range(i+1,j+1) && field[i+1][j+1] == enemy_color
+      check_line(i,j,1,-1,ary)  if within_range(i+1,j-1) && field[i+1][j-1] == enemy_color
+      check_line(i,j,-1,1,ary)  if within_range(i-1,j+1) && field[i-1][j+1] == enemy_color
+      check_line(i,j,-1,-1,ary) if within_range(i-1,j-1) && field[i-1][j-1] == enemy_color
+      @change_color_stocks
+    end
+
+    def within_range(i,j)
+      i<8 && j<8 && i>=0 && j>=0
+    end
 end
 
 class Piece
