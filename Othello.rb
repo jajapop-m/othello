@@ -123,24 +123,10 @@ class Board
       return "白" if color == :white
     end
 
-    def puts_field_with_line_numbers(cur_stat)
-      puts "#{print_color(my_color)}番" unless game_set?
-      cur_stat_with_line_numbers = Array.new(8){Array.new(8)}
-      cur_stat.each_with_index do |line,i|
-        cur_stat_with_line_numbers[i] = line.unshift(i+1)
-      end
-      cur_stat_with_line_numbers.unshift([*1..8])[0].unshift(" ")
-      cur_stat_with_line_numbers.each do |line|
-        line.each do |l|
-          print l.to_s.rjust(2)
-        end
-        puts "\r"
-      end
-    end
-
     def game_continuing?
       black,white = count_black_and_white
       if game_set?
+        puts "黒:#{black},白:#{white}".center(17)
         puts "引き分け".center(17) if black == white
         return false              if black == white
         puts black < white ? "白の勝ち".center(17) : "黒の勝ち".center(17)
@@ -187,6 +173,21 @@ class Board
       [black,white]
     end
 
+    def puts_field_with_line_numbers(cur_stat)
+      puts "#{print_color(my_color)}番" unless game_set?
+      cur_stat_with_line_numbers = Array.new(8){Array.new(8)}
+      cur_stat.each_with_index do |line,i|
+        cur_stat_with_line_numbers[i] = line.unshift(i+1)
+      end
+      cur_stat_with_line_numbers.unshift([*1..8])[0].unshift(" ")
+      cur_stat_with_line_numbers.each do |line|
+        line.each do |l|
+          print l.to_s.rjust(2)
+        end
+        puts "\r"
+      end
+    end
+
     def within_range(i,j)
       i<8 && j<8 && i>=0 && j>=0
     end
@@ -204,13 +205,15 @@ class Othello
     mode_select
   end
 
+  private
+
   def mode_select
     puts "どれにしますか？番号を入力して下さい"
     puts "1.人対コンピュータ, 2.人対人, 3.コンピュータ対コンピュータ"
     i = gets.to_i
     case i
     when 1
-      black_or_white
+      select_your_color
     when 2
       board.puts_field
       man_vs_man
@@ -223,7 +226,7 @@ class Othello
     end
   end
 
-  def black_or_white
+  def select_your_color
     puts "どちらにしますか？番号を入力して下さい"
     puts "1 黒番, 2 白番"
     i = gets.to_i
@@ -235,29 +238,61 @@ class Othello
       computer_vs_man
     else
       puts "もう一度入力して下さい"
-      return black_or_white
+      select_your_color
+    end
+  end
+
+  def ask_continue?
+    puts "もう一度プレイしますか？"
+    puts "1 はい, 2 いいえ (番号を入力して下さい)"
+    i = gets.to_i
+    case i
+    when 1
+      board.game_init
+      mode_select
+    when 2
+      puts "終了します"
+      exit
+    else
+      puts "もう一度入力して下さい"
+      ask_continue?
     end
   end
 
   def man_vs_man
-    man_turn
+    unless man_turn
+      board.puts_field
+      return ask_continue?
+    end
     man_vs_man
   end
 
   def man_vs_computer
     man_turn
-    return board.puts_field unless computer_turn
+    unless computer_turn
+      board.puts_field
+      return ask_continue?
+    end
     man_vs_computer
   end
 
   def computer_vs_man
-    return board.puts_field unless computer_turn
-    return board.puts_field unless man_turn
+    unless computer_turn
+      board.puts_field
+      return ask_continue?
+    end
+    unless man_turn
+      board.puts_field
+      return ask_continue?
+    end
     man_vs_computer
   end
 
   def computer_vs_computer
-    return board.puts_field unless computer_turn
+    unless computer_turn
+      board.puts_field
+      return ask_continue?
+    end
     computer_vs_computer
   end
 
@@ -276,6 +311,7 @@ class Othello
   end
 
   def put_request
+    print "縦 横: "
     i,j = gets.split.map(&:to_i)
     if i.nil? || j.nil?
       puts "もう一度入力して下さい"
