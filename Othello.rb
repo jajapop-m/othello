@@ -39,19 +39,6 @@ class Board
     put_piece(i,j)
   end
 
-  def check_line(i,j,a,b,ary)
-    return ary.clear if !within_range(i+a,j+b) || field[i+a][j+b] == :none
-    if field[i+a][j+b] == my_color
-      @change_color_stocks << ary.flatten
-    end
-    ary << [i+a,j+b]
-    check_line(i+a,j+b,a,b,ary)
-  end
-
-  def putable?(i,j)
-    !!putable_cells.find_index([i,j])
-  end
-
   def game_situation
     black,white = 0,0
     field.each do |line|
@@ -60,33 +47,17 @@ class Board
         white += 1 if cell == :white
       end
     end
-    if putable_cells.empty?
-      next_turn
-      if putable_cells.empty?
-        if black < white
-          puts "黒:#{black},白:#{white} 白の勝ち".center(17)
-        elsif black > white
-          puts "黒:#{black},白:#{white} 黒の勝ち".center(17)
-        else
-          puts "黒:#{black},白:#{white} 引き分け".center(17)
-        end
-        return true
-      else
-        next_turn
-        puts "黒:#{black},白:#{white}".center(17)
-        puts_field
-        puts "#{print_color(my_color)}:パスです。"
-        next_turn
-      end
+    puts "黒:#{black},白:#{white}".center(17)
+    if game_set?
+      return puts "引き分け".center(17) if black == white
+      return puts black < white ? "白の勝ち".center(17) : "黒の勝ち".center(17)
     else
-      puts "黒:#{black},白:#{white}".center(17)
+      next_turn
+      puts_field
+      puts "#{print_color(my_color)}:パスです。"
+      next_turn
     end
-    false
-  end
-
-  def print_color(color)
-    return print "黒" if color == :black
-    return print "白" if color == :white
+    true
   end
 
   def puts_field
@@ -98,22 +69,7 @@ class Board
         next cur_stat[i][j] = "◎".to_s.rjust(2) if cell == :white
       end
     end
-    add_line_numbers(cur_stat)
-  end
-
-  def add_line_numbers(cur_stat)
-    puts "#{print_color(my_color)}番"
-    cur_stat_with_line_numbers = Array.new(8){Array.new(8)}
-    cur_stat.each_with_index do |line,i|
-      cur_stat_with_line_numbers[i] = line.unshift(i+1)
-    end
-    cur_stat_with_line_numbers.unshift([*1..8])[0].unshift(" ")
-    cur_stat_with_line_numbers.each do |line|
-      line.each do |l|
-        print l.to_s.rjust(2)
-      end
-      puts "\r"
-    end
+    puts_field_with_line_numbers(cur_stat)
   end
 
   private
@@ -124,12 +80,8 @@ class Board
       end
     end
 
-    def gathering_turnable_pieces(i,j)
-      @change_color_stocks = []
-      [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]].each do |a,b|
-        check_line(i,j,a,b,ary=[]) if within_range(i+a,j+b) && field[i+a][j+b] == enemy_color
-      end
-      @change_color_stocks
+    def putable?(i,j)
+      !!putable_cells.find_index([i,j])
     end
 
     def putable_cells
@@ -161,6 +113,54 @@ class Board
         num += 1 unless piece.empty?
       end
       num
+    end
+
+    def gathering_turnable_pieces(i,j)
+      @change_color_stocks = []
+      [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]].each do |a,b|
+        check_line(i,j,a,b,ary=[]) if within_range(i+a,j+b) && field[i+a][j+b] == enemy_color
+      end
+      @change_color_stocks
+    end
+
+    def check_line(i,j,a,b,ary)
+      return ary.clear if !within_range(i+a,j+b) || field[i+a][j+b] == :none
+      if field[i+a][j+b] == my_color
+        @change_color_stocks << ary.flatten
+      end
+      ary << [i+a,j+b]
+      check_line(i+a,j+b,a,b,ary)
+    end
+
+    def print_color(color)
+      return "黒" if color == :black
+      return "白" if color == :white
+    end
+
+    def puts_field_with_line_numbers(cur_stat)
+      puts "#{print_color(my_color)}番" unless game_set?
+      cur_stat_with_line_numbers = Array.new(8){Array.new(8)}
+      cur_stat.each_with_index do |line,i|
+        cur_stat_with_line_numbers[i] = line.unshift(i+1)
+      end
+      cur_stat_with_line_numbers.unshift([*1..8])[0].unshift(" ")
+      cur_stat_with_line_numbers.each do |line|
+        line.each do |l|
+          print l.to_s.rjust(2)
+        end
+        puts "\r"
+      end
+    end
+
+    def game_set?
+      if putable_cells.empty?
+        next_turn
+        if putable_cells.empty?
+          next_turn
+          return true
+        end
+      end
+      false
     end
 
     def within_range(i,j)
@@ -240,14 +240,14 @@ class Othello
   def man_turn
     put_request
     board.next_turn
-    return false if board.game_situation
+    return false unless board.game_situation
     board.puts_field
   end
 
   def computer_turn
     board.auto_put_piece
     board.next_turn
-    return false if board.game_situation
+    return false unless board.game_situation
     board.puts_field
   end
 
