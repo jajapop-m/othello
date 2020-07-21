@@ -40,32 +40,10 @@ class Board
   end
 
   def game_situation
-    black,white = 0,0
-    field.each do |line|
-      line.each do |cell|
-        black += 1 if cell == :black
-        white += 1 if cell == :white
-      end
-    end
+    black,white = count_black_and_white
     puts "黒:#{black},白:#{white}".center(17)
-    if game_set?
-      return puts "引き分け".center(17) if black == white
-      return puts black < white ? "白の勝ち".center(17) : "黒の勝ち".center(17)
-    end
-    if pass?
-      next_turn
-      puts_field
-      puts "#{print_color(my_color)}:パスです。"
-      next_turn
-    end
-    true
-  end
-
-  def pass?
-    if putable_cells.empty?
-      next_turn
-      return true
-    end
+    pass_case_action
+    game_continuing?
   end
 
   def puts_field
@@ -160,6 +138,17 @@ class Board
       end
     end
 
+    def game_continuing?
+      black,white = count_black_and_white
+      if game_set?
+        puts "引き分け".center(17) if black == white
+        return false              if black == white
+        puts black < white ? "白の勝ち".center(17) : "黒の勝ち".center(17)
+        return false
+      end
+      true
+    end
+
     def game_set?
       if putable_cells.empty?
         next_turn
@@ -169,6 +158,33 @@ class Board
         next_turn
       end
       false
+    end
+
+    def pass_case_action
+      if pass?
+        next_turn
+        puts_field
+        puts "#{print_color(my_color)}:パスです。"
+        next_turn
+      end
+    end
+
+    def pass?
+      if putable_cells.empty?
+        next_turn
+        return true
+      end
+    end
+
+    def count_black_and_white
+      black,white = 0,0
+      field.each do |line|
+        line.each do |cell|
+          black += 1 if cell == :black
+          white += 1 if cell == :white
+        end
+      end
+      [black,white]
     end
 
     def within_range(i,j)
