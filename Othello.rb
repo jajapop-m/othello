@@ -124,9 +124,11 @@ class Board
         end
         return true
       else
+        next_turn
         puts "黒:#{black},白:#{white}".center(17)
         puts_field
-        puts "#{print_color(enemy_color)}:パスです。"
+        puts "#{print_color(my_color)}:パスです。"
+        next_turn
       end
     else
       puts "黒:#{black},白:#{white}".center(17)
@@ -152,6 +154,7 @@ class Board
   end
 
   def add_line_numbers(cur_stat)
+    puts "#{print_color(my_color)}番"
     cur_stat_with_line_numbers = Array.new(8){Array.new(8)}
     cur_stat.each_with_index do |line,i|
       cur_stat_with_line_numbers[i] = line.unshift(i+1)
