@@ -39,11 +39,11 @@ class Board
     put_piece(i,j)
   end
 
-  def game_situation
+  def current_judge
     black,white = count_black_and_white
     puts "黒:#{black},白:#{white}".center(17)
     pass_case_action
-    game_continuing?
+    game_over?
   end
 
   def puts_field
@@ -123,16 +123,16 @@ class Board
       return "白" if color == :white
     end
 
-    def game_continuing?
+    def game_over?
       black,white = count_black_and_white
       if game_set?
         puts "黒:#{black},白:#{white}".center(17)
         puts "引き分け".center(17) if black == white
-        return false              if black == white
+        return true               if black == white
         puts black < white ? "白の勝ち".center(17) : "黒の勝ち".center(17)
-        return false
+        return true
       end
-      true
+      false
     end
 
     def game_set?
@@ -186,6 +186,7 @@ class Board
         end
         puts "\r"
       end
+      nil
     end
 
     def within_range(i,j)

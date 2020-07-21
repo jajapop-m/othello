@@ -80,7 +80,7 @@ class Othello
   end
 
   def man_vs_man
-    unless man_turn
+    if man_turn
       board.puts_field
       return ask_continue?
     end
@@ -89,7 +89,7 @@ class Othello
 
   def man_vs_computer
     man_turn
-    unless computer_turn
+    if computer_turn
       board.puts_field
       return ask_continue?
     end
@@ -97,11 +97,11 @@ class Othello
   end
 
   def computer_vs_man
-    unless computer_turn
+    if computer_turn
       board.puts_field
       return ask_continue?
     end
-    unless man_turn
+    if man_turn
       board.puts_field
       return ask_continue?
     end
@@ -109,7 +109,7 @@ class Othello
   end
 
   def computer_vs_computer
-    unless computer_turn
+    if computer_turn
       board.puts_field
       return ask_continue?
     end
@@ -119,14 +119,14 @@ class Othello
   def man_turn
     put_request
     board.next_turn
-    return false unless board.game_situation
+    return true if board.current_judge
     board.puts_field
   end
 
   def computer_turn
     board.auto_put_piece
     board.next_turn
-    return false unless board.game_situation
+    return true if board.current_judge
     board.puts_field
   end
 
