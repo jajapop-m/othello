@@ -58,6 +58,17 @@ class Board
     puts_field_with_line_numbers(cur_stat)
   end
 
+  def game_set?
+    if putable_cells.empty?
+      next_turn
+      if putable_cells.empty?
+        return true
+      end
+      next_turn
+    end
+    false
+  end
+
   private
 
     def turn_pieces(i,j)
@@ -131,17 +142,6 @@ class Board
         return true               if black == white
         puts black < white ? "白の勝ち".center(17) : "黒の勝ち".center(17)
         return true
-      end
-      false
-    end
-
-    def game_set?
-      if putable_cells.empty?
-        next_turn
-        if putable_cells.empty?
-          return true
-        end
-        next_turn
       end
       false
     end

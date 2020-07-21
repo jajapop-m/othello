@@ -25,7 +25,7 @@ class Othello
       computer_vs_computer
     else
       puts "もう一度入力して下さい。"
-      return mode_select
+      mode_select
     end
   end
 
@@ -80,53 +80,44 @@ class Othello
   end
 
   def man_vs_man
-    if man_turn
-      board.puts_field
-      return ask_continue?
-    end
+    man_turn
+    return ask_continue? if board.game_set?
     man_vs_man
   end
 
   def man_vs_computer
     man_turn
-    if computer_turn
-      board.puts_field
-      return ask_continue?
-    end
+    return ask_continue? if board.game_set?
+    computer_turn
+    return ask_continue? if board.game_set?
     man_vs_computer
   end
 
   def computer_vs_man
-    if computer_turn
-      board.puts_field
-      return ask_continue?
-    end
-    if man_turn
-      board.puts_field
-      return ask_continue?
-    end
-    man_vs_computer
+    computer_turn
+    return ask_continue? if board.game_set?
+    man_turn
+    return ask_continue? if board.game_set?
+    computer_vs_man
   end
 
   def computer_vs_computer
-    if computer_turn
-      board.puts_field
-      return ask_continue?
-    end
+    computer_turn
+    return ask_continue? if board.game_set?
     computer_vs_computer
   end
 
   def man_turn
     put_request
     board.next_turn
-    return true if board.current_judge
+    board.current_judge
     board.puts_field
   end
 
   def computer_turn
     board.auto_put_piece
     board.next_turn
-    return true if board.current_judge
+    board.current_judge
     board.puts_field
   end
 
