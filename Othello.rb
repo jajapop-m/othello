@@ -126,15 +126,9 @@ class Board
 
     def gathering_turnable_pieces(i,j)
       @change_color_stocks = []
-      ary = []
-      check_line(i,j,1,0,ary)   if within_range(i+1,j) && field[i+1][j] == enemy_color
-      check_line(i,j,-1,0,ary)  if within_range(i-1,j) && field[i-1][j] == enemy_color
-      check_line(i,j,0,1,ary)   if within_range(i,j+1) && field[i][j+1] == enemy_color
-      check_line(i,j,0,-1,ary)  if within_range(i,j-1) && field[i][j-1] == enemy_color
-      check_line(i,j,1,1,ary)   if within_range(i+1,j+1) && field[i+1][j+1] == enemy_color
-      check_line(i,j,1,-1,ary)  if within_range(i+1,j-1) && field[i+1][j-1] == enemy_color
-      check_line(i,j,-1,1,ary)  if within_range(i-1,j+1) && field[i-1][j+1] == enemy_color
-      check_line(i,j,-1,-1,ary) if within_range(i-1,j-1) && field[i-1][j-1] == enemy_color
+      [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]].each do |a,b|
+        check_line(i,j,a,b,ary=[]) if within_range(i+a,j+b) && field[i+a][j+b] == enemy_color
+      end
       @change_color_stocks
     end
 
