@@ -27,14 +27,10 @@ class Board
   def put_piece(i,j)
     i -= 1
     j -= 1
-    if putable?(i,j)
-      turn_pieces(i,j)
-      field[i][j] = my_color
-      empty_cells.remove_from_empty_cells(i,j)
-    else
-      puts "そこには置けません"
-      return false
-    end
+    return puts "そこは置けません" unless putable?(i,j)
+    turn_pieces(i,j)
+    field[i][j] = my_color
+    empty_cells.remove_from_empty_cells(i,j)
   end
 
   def auto_put_piece
