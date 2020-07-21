@@ -1,23 +1,23 @@
 class Board
   attr_accessor :piece, :field, :my_color, :enemy_color, :empty_cells
   def initialize
+    game_init
+  end
+
+  def game_init
+    center_b = [[3,3],[4,4]]
+    center_w = [[3,4],[4,3]]
     @field = Array.new(8){Array.new(8,:none)}
-    field[3][3] = :black
-    field[3][4] = :white
-    field[4][3] = :white
-    field[4][4] = :black
-    @my_color = :black
-    @enemy_color = :white
+    center_b.each{|i,j| field[i][j] = :black}
+    center_w.each{|i,j| field[i][j] = :white}
+    @my_color, @enemy_color = :black, :white
     @empty_cells = []
-    for i in 0..7
-      for j in 0..7
+    (0..7).each do |i|
+      (0..7).each do |j|
         empty_cells << [i,j]
       end
     end
-    empty_cells.remove_from_empty_cells(3,3)
-    empty_cells.remove_from_empty_cells(3,4)
-    empty_cells.remove_from_empty_cells(4,3)
-    empty_cells.remove_from_empty_cells(4,4)
+    (center_b + center_w).each {|i,j| empty_cells.remove_from_empty_cells(i,j)}
   end
 
   def next_turn
