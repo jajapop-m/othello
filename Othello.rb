@@ -111,6 +111,7 @@ class Board
         white += 1 if cell == :white
       end
     end
+    p check_putable_cells[0]
     if check_putable_cells[0].empty?
       next_turn
       if check_putable_cells[0].empty?
@@ -123,13 +124,19 @@ class Board
         end
         return true
       else
-        puts "パスです。"
-        next_turn
+        puts "黒:#{black},白:#{white}".center(17)
+        puts_field
+        puts "#{print_color(enemy_color)}:パスです。"
       end
     else
       puts "黒:#{black},白:#{white}".center(17)
     end
     false
+  end
+
+  def print_color(color)
+    return print "黒" if color == :black
+    return print "白" if color == :white
   end
 
   def puts_field
