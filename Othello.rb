@@ -34,9 +34,9 @@ class Board
   end
 
   def auto_put_piece
-    sample = check_putable_cells[1].sample
-    i,j = sample[1],sample[2]
-    put_piece(i+1,j+1)
+    sample = max_cells.sample
+    i,j = sample[1]+1,sample[2]+1
+    put_piece(i,j)
   end
 
   def check_line(i,j,a,b,ary)
@@ -49,26 +49,7 @@ class Board
   end
 
   def putable?(i,j)
-    !!check_putable_cells[0].find_index([i,j])
-  end
-
-  def check_putable_cells
-    putable_cells = []
-    max = [0]
-    empty_cells.each do |i,j|
-      count = 0
-      gathering_turnable_pieces(i,j).each do |piece|
-        count += 1 unless piece.empty?
-      end
-      if max[0] <= count
-        max[0] = count
-        max << [count,i,j]
-      end
-      putable_cells << [i,j] if count > 0
-    end
-    m = max.shift
-    max.delete_if{|n| n[0]!=m}
-    [putable_cells,max]
+    !!putable_cells.find_index([i,j])
   end
 
   def game_situation
@@ -79,9 +60,9 @@ class Board
         white += 1 if cell == :white
       end
     end
-    if check_putable_cells[0].empty?
+    if putable_cells.empty?
       next_turn
-      if check_putable_cells[0].empty?
+      if putable_cells.empty?
         if black < white
           puts "黒:#{black},白:#{white} 白の勝ち".center(17)
         elsif black > white
@@ -155,6 +136,37 @@ class Board
       check_line(i,j,-1,1,ary)  if within_range(i-1,j+1) && field[i-1][j+1] == enemy_color
       check_line(i,j,-1,-1,ary) if within_range(i-1,j-1) && field[i-1][j-1] == enemy_color
       @change_color_stocks
+    end
+
+    def putable_cells
+      putable_cells = []
+      empty_cells.each do |i,j|
+        turnable_num = numbers_of_turnable_pieces(i,j)
+        putable_cells << [i,j] if turnable_num > 0
+      end
+      putable_cells
+    end
+
+    def max_cells
+      max = [0]
+      empty_cells.each do |i,j|
+        turnable_num = numbers_of_turnable_pieces(i,j)
+        if max[0] <= turnable_num
+          max[0] = turnable_num
+          max << [turnable_num,i,j]
+        end
+      end
+      m = max.shift
+      max.delete_if{|cell| cell[0]!=m}
+      max
+    end
+
+    def numbers_of_turnable_pieces(i,j)
+      num = 0
+      gathering_turnable_pieces(i,j).each do |piece|
+        num += 1 unless piece.empty?
+      end
+      num
     end
 
     def within_range(i,j)
