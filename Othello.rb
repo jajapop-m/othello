@@ -51,13 +51,21 @@ class Board
     if game_set?
       return puts "引き分け".center(17) if black == white
       return puts black < white ? "白の勝ち".center(17) : "黒の勝ち".center(17)
-    else
+    end
+    if pass?
       next_turn
       puts_field
       puts "#{print_color(my_color)}:パスです。"
       next_turn
     end
     true
+  end
+
+  def pass?
+    if putable_cells.empty?
+      next_turn
+      return true
+    end
   end
 
   def puts_field
@@ -156,9 +164,9 @@ class Board
       if putable_cells.empty?
         next_turn
         if putable_cells.empty?
-          next_turn
           return true
         end
+        next_turn
       end
       false
     end
