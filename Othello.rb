@@ -46,46 +46,13 @@ class Othello
       end
     end
 
-    def ask_continue?
-      puts "もう一度プレイしますか？"
-      puts "1 はい, 2 いいえ (番号を入力して下さい)"
-      i = gets.to_i
-      case i
-      when 1
-        board.game_init
-        mode_select
-      when 2
-        puts "終了します"
-        exit
-      else
-        puts "もう一度入力して下さい"
-        ask_continue?
-      end
-    end
-
-    def ask_retire?
-      puts "本当にゲームを終了しますか？"
-      puts "1 はい, 2 いいえ (番号を入力して下さい)"
-      i = gets.to_i
-      case i
-      when 1
-        ask_continue?
-      when 2
-        board.puts_field
-        put_request
-      else
-        puts "もう一度入力して下さい"
-        ask_retire?
-      end
-    end
-
     def self.define_vs_method(computer_or_man1,computer_or_man2)
       define_method("#{computer_or_man1}_vs_#{computer_or_man2}") do
-        self.send "#{computer_or_man1}_turn"
+        send "#{computer_or_man1}_turn"
         return ask_continue? if board.game_set?
-        self.send "#{computer_or_man2}_turn"
+        send "#{computer_or_man2}_turn"
         return ask_continue? if board.game_set?
-        self.send "#{computer_or_man1}_vs_#{computer_or_man2}"
+        send "#{computer_or_man1}_vs_#{computer_or_man2}"
       end
     end
 
@@ -118,6 +85,39 @@ class Othello
         return put_request
       end
       put_request unless board.put_piece(i.to_i,j.to_i)
+    end
+
+    def ask_continue?
+      puts "もう一度プレイしますか？"
+      puts "1 はい, 2 いいえ (番号を入力して下さい)"
+      i = gets.to_i
+      case i
+      when 1
+        board.game_init
+        mode_select
+      when 2
+        puts "終了します"
+        exit
+      else
+        puts "もう一度入力して下さい"
+        ask_continue?
+      end
+    end
+
+    def ask_retire?
+      puts "本当にゲームを終了しますか？"
+      puts "1 はい, 2 いいえ (番号を入力して下さい)"
+      i = gets.to_i
+      case i
+      when 1
+        ask_continue?
+      when 2
+        board.puts_field
+        put_request
+      else
+        puts "もう一度入力して下さい"
+        ask_retire?
+      end
     end
 end
 
