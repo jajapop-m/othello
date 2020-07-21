@@ -33,7 +33,8 @@ class Board
   end
 
   def auto_put_piece
-    sample = max_cells.sample
+    sample = turnable_corners&.sample
+    sample ||= max_cells.sample
     i,j = sample[1]+1,sample[2]+1
     put_piece(i,j)
   end
@@ -113,6 +114,15 @@ class Board
         check_line(i,j,a,b,ary=[]) if within_range(i+a,j+b) && field[i+a][j+b] == enemy_color
       end
       @change_color_stocks
+    end
+
+    def turnable_corners
+      corners =[]
+      [[0,0],[0,7],[7,0],[7,7]].each do |i,j|
+        corners << [:corner,i,j] if able_to_put?(i,j)
+      end
+      return nil if corners.empty?
+      corners
     end
 
     def check_line(i,j,a,b,ary)
