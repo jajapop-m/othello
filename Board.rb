@@ -25,9 +25,8 @@ class Board
   end
 
   def put_piece(i,j)
-    i -= 1
-    j -= 1
-    return puts "そこは置けません" unless putable?(i,j)
+    i -= 1; j -= 1
+    return puts "そこは置けません" unless able_to_put?(i,j)
     turn_pieces(i,j)
     field[i][j] = my_color
     empty_cells.remove_from_empty_cells(i,j)
@@ -48,8 +47,8 @@ class Board
 
   def puts_field
     cur_stat = Array.new(8){Array.new(8)}
-    field.each_with_index do |f,i|
-      f.each_with_index do |cell,j|
+    field.each_with_index do |line,i|
+      line.each_with_index do |cell,j|
         next cur_stat[i][j] = "□".to_s.rjust(2) if cell == :none
         next cur_stat[i][j] = "●".to_s.rjust(2) if cell == :black
         next cur_stat[i][j] = "◎".to_s.rjust(2) if cell == :white
@@ -61,9 +60,7 @@ class Board
   def game_set?
     if putable_cells.empty?
       next_turn
-      if putable_cells.empty?
-        return true
-      end
+      return true if putable_cells.empty?
       next_turn
     end
     false
@@ -72,13 +69,13 @@ class Board
   private
 
     def turn_pieces(i,j)
-      gathering_turnable_pieces(i,j).each do |line|
+      turnable_pieces(i,j).each do |line|
         line.each_slice(2) {|i,j| field[i][j] = my_color }
       end
     end
 
-    def putable?(i,j)
-      !!putable_cells.find_index([i,j])
+    def able_to_put?(i,j)
+      putable_cells.include?([i,j])
     end
 
     def putable_cells
@@ -91,28 +88,26 @@ class Board
     end
 
     def max_cells
-      max = [0]
+      cells = [0]
       empty_cells.each do |i,j|
         turnable_num = numbers_of_turnable_pieces(i,j)
-        if max[0] <= turnable_num
-          max[0] = turnable_num
-          max << [turnable_num,i,j]
+        if cells[0] <= turnable_num
+          cells[0] = turnable_num
+          cells << [turnable_num,i,j]
         end
       end
-      m = max.shift
-      max.delete_if{|cell| cell[0]!=m}
-      max
+      m = cells.shift
+      cells.delete_if{|cell| cell[0]!=m}
+      cells
     end
 
     def numbers_of_turnable_pieces(i,j)
       num = 0
-      gathering_turnable_pieces(i,j).each do |piece|
-        num += 1 unless piece.empty?
-      end
+      turnable_pieces(i,j).each {|pieces| num = pieces.length / 2 }
       num
     end
 
-    def gathering_turnable_pieces(i,j)
+    def turnable_pieces(i,j)
       @change_color_stocks = []
       [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]].each do |a,b|
         check_line(i,j,a,b,ary=[]) if within_range(i+a,j+b) && field[i+a][j+b] == enemy_color
@@ -122,9 +117,7 @@ class Board
 
     def check_line(i,j,a,b,ary)
       return ary.clear if !within_range(i+a,j+b) || field[i+a][j+b] == :none
-      if field[i+a][j+b] == my_color
-        @change_color_stocks << ary.flatten
-      end
+      return @change_color_stocks << ary.flatten if field[i+a][j+b] == my_color
       ary << [i+a,j+b]
       check_line(i+a,j+b,a,b,ary)
     end
