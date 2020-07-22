@@ -1,8 +1,11 @@
 class Board
   attr_accessor :piece, :field, :my_color, :enemy_color, :empty_cells, :black_win, :white_win, :even
+  Max, Min = 64, 0
   def initialize
     game_init
     @black_win, @white_win, @even = 0,0,0
+    @max_cells_condition = -> {@cells[0] <= @turnable_num}
+    @min_cells_condition = -> {@turnable_num != 0 && @cells[0] >= @turnable_num}
   end
 
   def game_init
@@ -35,19 +38,19 @@ class Board
 
   def auto_put_piece
     sample = turnable_corners&.sample
-    sample ||= max_cells.sample if empty_cells.length <= 25
-    sample ||= min_cells.sample if empty_cells.length >= 26
+    sample ||= max_or_min_cells(Min,@max_cells_condition).sample if empty_cells.length <= 25
+    sample ||= max_or_min_cells(Max,@min_cells_condition).sample if empty_cells.length >= 26
     i,j = sample[1]+1,sample[2]+1
     put_piece(i,j)
   end
 
-  def auto_put_piece_minimum
-    sample = turnable_corners&.sample
-    sample ||= max_cells.sample if empty_cells.length <= 32
-    sample ||= min_cells.sample if empty_cells.length >= 33
-    i,j = sample[1]+1,sample[2]+1
-    put_piece(i,j)
-  end
+  # def auto_put_piece_minimum
+  #   sample = turnable_corners&.sample
+  #   sample ||= max_cells.sample if empty_cells.length <= 32
+  #   sample ||= min_cells.sample if empty_cells.length >= 33
+  #   i,j = sample[1]+1,sample[2]+1
+  #   put_piece(i,j)
+  # end
 
   def current_judge
     black,white = count_black_and_white
@@ -102,33 +105,18 @@ class Board
       putable_cells
     end
 
-    def max_cells
-      cells = [0]
+    def max_or_min_cells(i,block)
+      @cells = [i]
       empty_cells.each do |i,j|
-        turnable_num = numbers_of_turnable_pieces(i,j)
-        if cells[0] <= turnable_num
-          cells[0] = turnable_num
-          cells << [turnable_num,i,j]
+        @turnable_num = numbers_of_turnable_pieces(i,j)
+        if block.call
+          @cells[0] = @turnable_num
+          @cells << [@turnable_num,i,j]
         end
       end
-      m = cells.shift
-      cells.delete_if{|cell| cell[0]!=m}
-      cells
-    end
-
-    def min_cells
-      cells = [64]
-      empty_cells.each do |i,j|
-        turnable_num = numbers_of_turnable_pieces(i,j)
-        next if turnable_num == 0
-        if cells[0] >= turnable_num
-          cells[0] = turnable_num
-          cells << [turnable_num,i,j]
-        end
-      end
-      m = cells.shift
-      cells.delete_if{|cell| cell[0]!=m}
-      cells
+      m = @cells.shift
+      @cells.delete_if{|cell| cell[0]!=m}
+      @cells
     end
 
     def numbers_of_turnable_pieces(i,j)
