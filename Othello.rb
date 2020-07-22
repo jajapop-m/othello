@@ -62,7 +62,7 @@ class Othello
       define_vs_method(cm1,cm2)
     end
 
-    # define_vs_method(:computer,:computer2)
+    define_vs_method(:computer,:computer2)
 
     def man_turn
       put_request
@@ -74,10 +74,10 @@ class Othello
       after_put_piece
     end
 
-    # def computer2_turn
-    #   board.auto_put_piece_minimum
-    #   after_put_piece
-    # end
+    def computer2_turn
+      board.auto_put_piece_v2
+      after_put_piece
+    end
 
     def after_put_piece
       board.next_turn
