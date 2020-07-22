@@ -105,11 +105,11 @@ class Board
       putable_cells
     end
 
-    def max_or_min_cells(i,block)
+    def max_or_min_cells(i,proc)
       @cells = [i]
       empty_cells.each do |i,j|
         @turnable_num = numbers_of_turnable_pieces(i,j)
-        if block.call
+        if proc.call
           @cells[0] = @turnable_num
           @cells << [@turnable_num,i,j]
         end
