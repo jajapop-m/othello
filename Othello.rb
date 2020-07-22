@@ -8,12 +8,19 @@ class Othello
     mode_select
   end
 
+  def auto_run
+    100.times do
+      computer_vs_computer2
+    end
+  end
+
   private
 
     def mode_select
       puts "どれにしますか？番号を入力して下さい"
       puts "1.人対コンピュータ, 2.人対人, 3.コンピュータ対コンピュータ"
       i = gets.to_i
+      # i = 3
       case i
       when 1
         select_your_color
@@ -22,7 +29,7 @@ class Othello
         man_vs_man
       when 3
         board.puts_field
-        computer_vs_computer
+        computer_vs_computer2
       else
         puts "もう一度入力して下さい。"
         mode_select
@@ -56,7 +63,7 @@ class Othello
       end
     end
 
-    [[:man,:man],[:man,:computer],[:computer,:man],[:computer,:computer]].each do |cm1,cm2|
+    [[:man,:man],[:man,:computer],[:computer,:man],[:computer,:computer2]].each do |cm1,cm2|
       define_vs_method(cm1,cm2)
     end
 
@@ -67,6 +74,11 @@ class Othello
 
     def computer_turn
       board.auto_put_piece
+      after_put_piece
+    end
+
+    def computer2_turn
+      board.auto_put_piece_minimum
       after_put_piece
     end
 
@@ -88,9 +100,11 @@ class Othello
     end
 
     def ask_continue?
+      puts "黒#{board.black_win},白#{board.white_win},引き分け#{board.even}"
       puts "もう一度プレイしますか？"
       puts "1 はい, 2 いいえ (番号を入力して下さい)"
       i = gets.to_i
+      # i = 1
       case i
       when 1
         board.game_init
@@ -121,4 +135,5 @@ class Othello
     end
 end
 
+# Othello.new.auto_run
 Othello.new

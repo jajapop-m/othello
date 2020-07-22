@@ -1,7 +1,8 @@
 class Board
-  attr_accessor :piece, :field, :my_color, :enemy_color, :empty_cells
+  attr_accessor :piece, :field, :my_color, :enemy_color, :empty_cells, :black_win, :white_win, :even
   def initialize
     game_init
+    @black_win, @white_win, @even = 0,0,0
   end
 
   def game_init
@@ -34,7 +35,16 @@ class Board
 
   def auto_put_piece
     sample = turnable_corners&.sample
-    sample ||= max_cells.sample
+    sample ||= max_cells.sample if empty_cells.length <= 25
+    sample ||= min_cells.sample if empty_cells.length >= 26
+    i,j = sample[1]+1,sample[2]+1
+    put_piece(i,j)
+  end
+
+  def auto_put_piece_minimum
+    sample = turnable_corners&.sample
+    sample ||= max_cells.sample if empty_cells.length <= 32
+    sample ||= min_cells.sample if empty_cells.length >= 33
     i,j = sample[1]+1,sample[2]+1
     put_piece(i,j)
   end
@@ -67,6 +77,10 @@ class Board
     false
   end
 
+  def stock_win_count
+
+  end
+
   private
 
     def turn_pieces(i,j)
@@ -93,6 +107,21 @@ class Board
       empty_cells.each do |i,j|
         turnable_num = numbers_of_turnable_pieces(i,j)
         if cells[0] <= turnable_num
+          cells[0] = turnable_num
+          cells << [turnable_num,i,j]
+        end
+      end
+      m = cells.shift
+      cells.delete_if{|cell| cell[0]!=m}
+      cells
+    end
+
+    def min_cells
+      cells = [64]
+      empty_cells.each do |i,j|
+        turnable_num = numbers_of_turnable_pieces(i,j)
+        next if turnable_num == 0
+        if cells[0] >= turnable_num
           cells[0] = turnable_num
           cells << [turnable_num,i,j]
         end
@@ -142,9 +171,9 @@ class Board
       if game_set?
         puts "黒:#{black},白:#{white}".center(17)
         puts "引き分け".center(17) if black == white
-        return true               if black == white
+        return @even += 1          if black == white
         puts black < white ? "白の勝ち".center(17) : "黒の勝ち".center(17)
-        return true
+        return black < white ? (@white_win += 1) : (@black_win += 1)
       end
       false
     end
