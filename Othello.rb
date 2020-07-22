@@ -23,8 +23,8 @@ class Othello
         man_vs_man
       when 3
         board.puts_field
-        # computer_vs_computer
-        computer_vs_computer2
+        computer_vs_computer
+        # computer_vs_computer2
       else
         puts "もう一度入力して下さい。"
         mode_select
