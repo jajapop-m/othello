@@ -49,15 +49,11 @@ class Board
   end
 
   # auto_run
-  def auto_put_piece_v2
-    sample = turnable(Corner)&.sample
-    sample ||= turnable(Side)&.sample
-    sample ||= max_or_min_cells_v2(Min,@max_cells_condition).sample if empty_cells.length <= 25
-    sample ||= max_or_min_cells_v2(Max,@min_cells_condition).sample if empty_cells.length >= 26
-    p sample
-    i,j = sample[1]+1,sample[2]+1
-    put_piece(i,j)
-  end
+  # def auto_put_piece_v2
+  #   sample = max_or_min_cells_v2(Min,@max_cells_condition).sample
+  #   i,j = sample[1]+1,sample[2]+1
+  #   put_piece(i,j)
+  # end
 
   def current_judge
     black,white = count_black_and_white
@@ -129,8 +125,8 @@ class Board
 
     def max_or_min_cells_v2(i,proc)
       @cells = [i]
-      empties = empty_cells - Sub_Corner
-      empties = empty_cells if (putable_cells & empties).empty?
+      # empties = empty_cells - Sub_Corner
+      empties = empty_cells # if (putable_cells & empties).empty?
       empties.each do |i,j|
         @turnable_num = numbers_of_turnable_pieces(i,j)
         if proc.call

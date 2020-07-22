@@ -23,8 +23,8 @@ class Othello
         man_vs_man
       when 3
         board.puts_field
-        computer_vs_computer
-        # computer_vs_computer2
+        # computer_vs_computer
+        computer_vs_computer2
       else
         puts "もう一度入力して下さい。"
         mode_select
@@ -62,7 +62,7 @@ class Othello
       define_vs_method(cm1,cm2)
     end
 
-    define_vs_method(:computer,:computer2)
+    # define_vs_method(:computer,:computer2)
 
     def man_turn
       put_request
@@ -74,10 +74,10 @@ class Othello
       after_put_piece
     end
 
-    def computer2_turn
-      board.auto_put_piece_v2
-      after_put_piece
-    end
+    # def computer2_turn
+    #   board.auto_put_piece_v2
+    #   after_put_piece
+    # end
 
     def after_put_piece
       board.next_turn
