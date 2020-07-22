@@ -1,6 +1,9 @@
 class Board
   attr_accessor :piece, :field, :my_color, :enemy_color, :empty_cells, :black_win, :white_win, :even
   Max, Min = 64, 0
+  Corner = [[0,0],[0,7],[7,0],[7,7]]
+  Side = [[0,2],[0,3],[0,4],[0,5],[2,0],[2,7],[3,0],[3,7],[4,0],[4,7],[5,0],[5,7],[7,2],[7,3],[7,4],[7,5]]
+  Sub_Corner = [[0,1],[0,6],[1,0],[1,1],[1,6],[1,7],[6,0],[6,1],[6,6],[6,7],[7,1],[7,6]]
   def initialize
     game_init
     @black_win, @white_win, @even = 0,0,0
@@ -37,7 +40,8 @@ class Board
   end
 
   def auto_put_piece
-    sample = turnable_corners&.sample
+    sample = turnable(Corner)&.sample
+    sample ||= turnable(Side)&.sample
     sample ||= max_or_min_cells(Min,@max_cells_condition).sample if empty_cells.length <= 25
     sample ||= max_or_min_cells(Max,@min_cells_condition).sample if empty_cells.length >= 26
     i,j = sample[1]+1,sample[2]+1
@@ -45,9 +49,10 @@ class Board
   end
 
   # def auto_put_piece_minimum
-  #   sample = turnable_corners&.sample
-  #   sample ||= max_cells.sample if empty_cells.length <= 32
-  #   sample ||= min_cells.sample if empty_cells.length >= 33
+  #   sample = turnable(Corner)&.sample
+  #   sample ||= turnable(Side)&.sample
+  #   sample ||= max_or_min_cells(Min,@max_cells_condition).sample if empty_cells.length <= 25
+  #   sample ||= max_or_min_cells(Max,@min_cells_condition).sample if empty_cells.length >= 26
   #   i,j = sample[1]+1,sample[2]+1
   #   put_piece(i,j)
   # end
@@ -133,13 +138,13 @@ class Board
       @change_color_stocks
     end
 
-    def turnable_corners
-      corners =[]
-      [[0,0],[0,7],[7,0],[7,7]].each do |i,j|
-        corners << [:corner,i,j] if able_to_put?(i,j)
+    def turnable(c_or_s)
+      corners_or_sides =[]
+      c_or_s.each do |i,j|
+        corners_or_sides << [:corner_side,i,j] if able_to_put?(i,j)
       end
-      return nil if corners.empty?
-      corners
+      return nil if corners_or_sides.empty?
+      corners_or_sides
     end
 
     def check_line(i,j,a,b,ary)

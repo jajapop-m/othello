@@ -8,12 +8,6 @@ class Othello
     mode_select
   end
 
-  def auto_run
-    100.times do
-      computer_vs_computer
-    end
-  end
-
   private
 
     def mode_select
@@ -30,6 +24,7 @@ class Othello
       when 3
         board.puts_field
         computer_vs_computer
+        # computer_vs_computer2
       else
         puts "もう一度入力して下さい。"
         mode_select
@@ -67,6 +62,8 @@ class Othello
       define_vs_method(cm1,cm2)
     end
 
+    # define_vs_method(:computer,:computer2)
+
     def man_turn
       put_request
       after_put_piece
@@ -77,7 +74,7 @@ class Othello
       after_put_piece
     end
 
-    # def computer_turn
+    # def computer2_turn
     #   board.auto_put_piece_minimum
     #   after_put_piece
     # end
@@ -135,5 +132,4 @@ class Othello
     end
 end
 
-# Othello.new.auto_run
 Othello.new
