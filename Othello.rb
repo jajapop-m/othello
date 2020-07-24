@@ -8,8 +8,15 @@ class Othello
     mode_select
   end
 
+  def current_judge
+    black,white = count_black_and_white
+    puts "黒:#{black},白:#{white}".center(17)
+    pass_case_action
+    game_over?
+  end
+
   def game_over?
-    black,white = board.count_black_and_white
+    black,white = count_black_and_white
     if board.game_set?
       puts "黒:#{black},白:#{white}".center(17)
       puts "引き分け".center(17) if black == white
@@ -21,6 +28,33 @@ class Othello
   end
 
   private
+
+    def count_black_and_white
+      black,white = 0,0
+      board.field.each do |line|
+        line.each do |cell|
+          black += 1 if cell == :black
+          white += 1 if cell == :white
+        end
+      end
+      [black,white]
+    end
+
+    def pass_case_action
+      if pass?
+        board.next_turn
+        board.puts_field
+        puts "#{board.print_color(board.my_color)}:パスです。"
+        board.next_turn
+      end
+    end
+
+    def pass?
+      if board.putable_cells.empty?
+        board.next_turn
+        return true
+      end
+    end
 
     def mode_select
       puts "どれにしますか？番号を入力して下さい"
@@ -93,7 +127,7 @@ class Othello
 
     def after_put_piece
       board.next_turn
-      board.current_judge
+      current_judge
       board.puts_field
     end
 

@@ -55,12 +55,12 @@ class Board
   #   put_piece(i,j)
   # end
 
-  def current_judge
-    black,white = count_black_and_white
-    puts "黒:#{black},白:#{white}".center(17)
-    pass_case_action
-    game_over?
-  end
+  # def current_judge
+  #   black,white = count_black_and_white
+  #   puts "黒:#{black},白:#{white}".center(17)
+  #   pass_case_action
+  #   game_over?
+  # end
 
   def puts_field
     cur_stat = Array.new(8){Array.new(8)}
@@ -83,8 +83,18 @@ class Board
     false
   end
 
-  def stock_win_count
+  def putable_cells
+    putable_cells = []
+    empty_cells.each do |i,j|
+      turnable_num = numbers_of_turnable_pieces(i,j)
+      putable_cells << [i,j] if turnable_num > 0
+    end
+    putable_cells
+  end
 
+  def print_color(color)
+    return "黒" if color == :black
+    return "白" if color == :white
   end
 
   private
@@ -97,15 +107,6 @@ class Board
 
     def able_to_put?(i,j)
       putable_cells.include?([i,j])
-    end
-
-    def putable_cells
-      putable_cells = []
-      empty_cells.each do |i,j|
-        turnable_num = numbers_of_turnable_pieces(i,j)
-        putable_cells << [i,j] if turnable_num > 0
-      end
-      putable_cells
     end
 
     def max_or_min_cells(i,proc)
@@ -168,37 +169,32 @@ class Board
       check_line(i+a,j+b,a,b,ary)
     end
 
-    def print_color(color)
-      return "黒" if color == :black
-      return "白" if color == :white
-    end
+    # def pass_case_action
+    #   if pass?
+    #     next_turn
+    #     puts_field
+    #     puts "#{print_color(my_color)}:パスです。"
+    #     next_turn
+    #   end
+    # end
+    #
+    # def pass?
+    #   if putable_cells.empty?
+    #     next_turn
+    #     return true
+    #   end
+    # end
 
-    def pass_case_action
-      if pass?
-        next_turn
-        puts_field
-        puts "#{print_color(my_color)}:パスです。"
-        next_turn
-      end
-    end
-
-    def pass?
-      if putable_cells.empty?
-        next_turn
-        return true
-      end
-    end
-
-    def count_black_and_white
-      black,white = 0,0
-      field.each do |line|
-        line.each do |cell|
-          black += 1 if cell == :black
-          white += 1 if cell == :white
-        end
-      end
-      [black,white]
-    end
+    # def count_black_and_white
+    #   black,white = 0,0
+    #   field.each do |line|
+    #     line.each do |cell|
+    #       black += 1 if cell == :black
+    #       white += 1 if cell == :white
+    #     end
+    #   end
+    #   [black,white]
+    # end
 
     def puts_field_with_line_numbers(cur_stat)
       puts "#{print_color(my_color)}番" unless game_set?
