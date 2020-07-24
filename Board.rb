@@ -235,6 +235,9 @@ end
 
 class Piece
   attr_accessor :color, :openness
+  def initialize
+    @openness = 9
+  end
 end
 
 class Array
