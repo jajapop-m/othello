@@ -27,6 +27,10 @@ class Board
     (center_b + center_w).each {|i,j| empty_cells.remove_from_empty_cells(i,j)}
   end
 
+  def next_turn
+    @my_color, @enemy_color = enemy_color, my_color
+  end
+
   def auto_put_request
     sample = turnable(Corner)&.sample
     sample ||= turnable(Side)&.sample
@@ -55,17 +59,16 @@ class Board
     [black,white]
   end
 
-
-  def able_to_put?(i,j)
-    putable_cells.include?([i,j])
-  end
-
   def put_and_turn_pieces(i,j)
     field[i][j] = my_color
     turnable_pieces(i,j).each do |line|
       line.each_slice(2) {|i,j| field[i][j] = my_color }
     end
     empty_cells.remove_from_empty_cells(i,j)
+  end
+
+  def able_to_put?(i,j)
+    putable_cells.include?([i,j])
   end
 
   def game_over?
@@ -92,10 +95,6 @@ class Board
       end
     end
     nil
-  end
-
-  def next_turn
-    @my_color, @enemy_color = enemy_color, my_color
   end
 
   private
@@ -139,7 +138,7 @@ class Board
     def turnable_pieces(i,j)
       @change_color_stocks = []
       [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]].each do |a,b|
-        check_line(i,j,a,b,ary=[]) if within_range(i+a,j+b) && field[i+a][j+b] == enemy_color
+        check_line_if_turnable(i,j,a,b,ary=[]) if within_range(i+a,j+b) && field[i+a][j+b] == enemy_color
       end
       @change_color_stocks
     end
@@ -153,11 +152,11 @@ class Board
       corners_or_sides
     end
 
-    def check_line(i,j,a,b,ary)
+    def check_line_if_turnable(i,j,a,b,ary)
       return ary.clear if !within_range(i+a,j+b) || field[i+a][j+b] == :none
       return @change_color_stocks << ary.flatten if field[i+a][j+b] == my_color
       ary << [i+a,j+b]
-      check_line(i+a,j+b,a,b,ary)
+      check_line_if_turnable(i+a,j+b,a,b,ary)
     end
 
     def within_range(i,j)

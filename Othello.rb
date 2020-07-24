@@ -80,6 +80,17 @@ class Othello
     #   after_put_piece
     # end
 
+    def put_request
+      print "縦 横: "
+      i,j = gets.split
+      return ask_retire? if i == "end" || i == "exit"
+      if i.nil? || j.nil?
+        puts "もう一度入力して下さい"
+        return put_request
+      end
+      put_request unless put_piece(i.to_i,j.to_i)
+    end
+
     def put_piece(i,j)
       i -= 1; j -= 1
       return puts "そこは置けません" unless board.able_to_put?(i,j)
@@ -99,15 +110,6 @@ class Othello
       puts "黒:#{black},白:#{white}".center(17)
     end
 
-    def if_gameover_puts_result
-      return unless board.game_over?
-      result, black, white = board.game_over_results
-      puts "黒:#{black},白:#{white}".center(17)
-      puts "引き分け".center(17) if result == :even
-      puts "黒の勝ち".center(17) if result == :black
-      puts "白の勝ち".center(17) if result == :white
-    end
-
     def if_pass_next_turn
       if board.putable_cells.empty?
         puts_field
@@ -116,15 +118,13 @@ class Othello
       end
     end
 
-    def put_request
-      print "縦 横: "
-      i,j = gets.split
-      return ask_retire? if i == "end" || i == "exit"
-      if i.nil? || j.nil?
-        puts "もう一度入力して下さい"
-        return put_request
-      end
-      put_request unless put_piece(i.to_i,j.to_i)
+    def if_gameover_puts_result
+      return unless board.game_over?
+      result, black, white = board.game_over_results
+      puts "黒:#{black},白:#{white}".center(17)
+      puts "引き分け".center(17) if result == :even
+      puts "黒の勝ち".center(17) if result == :black
+      puts "白の勝ち".center(17) if result == :white
     end
 
     def puts_field
