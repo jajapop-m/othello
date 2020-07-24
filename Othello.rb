@@ -8,37 +8,7 @@ class Othello
     mode_select
   end
 
-  def current_judge
-    black,white = count_black_and_white
-    puts "黒:#{black},白:#{white}".center(17)
-    board.pass_case_action
-    if_gameover_puts_result
-  end
-
-  def if_gameover_puts_result
-    black,white = count_black_and_white
-    if board.game_over?
-      puts "黒:#{black},白:#{white}".center(17)
-      puts "引き分け".center(17) if black == white
-      return board.even += 1          if black == white
-      puts black < white ? "白の勝ち".center(17) : "黒の勝ち".center(17)
-      return black < white ? (board.white_win += 1) : (board.black_win += 1)
-    end
-    false
-  end
-
   private
-
-    def count_black_and_white
-      black,white = 0,0
-      board.field.each do |line|
-        line.each do |cell|
-          black += 1 if cell == :black
-          white += 1 if cell == :white
-        end
-      end
-      [black,white]
-    end
 
     def mode_select
       puts "どれにしますか？番号を入力して下さい"
@@ -100,7 +70,8 @@ class Othello
     end
 
     def computer_turn
-      board.auto_put_piece
+      i,j = board.auto_put_request
+      put_piece(i,j)
       after_put_piece
     end
 
@@ -109,10 +80,43 @@ class Othello
     #   after_put_piece
     # end
 
+    def put_piece(i,j)
+      i -= 1; j -= 1
+      return puts "そこは置けません" unless board.able_to_put?(i,j)
+      board.turn_pieces(i,j)
+    end
+
     def after_put_piece
       board.next_turn
-      current_judge
+      puts_current_situation
+      if_pass_next_turn
+      if_gameover_puts_result
       board.puts_field
+    end
+
+    def puts_current_situation
+      black,white = board.count_black_and_white
+      puts "黒:#{black},白:#{white}".center(17)
+    end
+
+    def if_gameover_puts_result
+      black,white = board.count_black_and_white
+      if board.game_over?
+        puts "黒:#{black},白:#{white}".center(17)
+        puts "引き分け".center(17) if black == white
+        return board.even += 1    if black == white
+        puts black < white ? "白の勝ち".center(17) : "黒の勝ち".center(17)
+        return black < white ? (board.white_win += 1) : (board.black_win += 1)
+      end
+      false
+    end
+
+    def if_pass_next_turn
+      if board.putable_cells.empty?
+        board.puts_field
+        puts "#{board.print_color(board.my_color)}:パスです。"
+        board.next_turn
+      end
     end
 
     def put_request
@@ -123,7 +127,7 @@ class Othello
         puts "もう一度入力して下さい"
         return put_request
       end
-      put_request unless board.put_piece(i.to_i,j.to_i)
+      put_request unless put_piece(i.to_i,j.to_i)
     end
 
     def ask_continue?

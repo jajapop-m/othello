@@ -31,36 +31,14 @@ class Board
     @my_color, @enemy_color = enemy_color, my_color
   end
 
-  def put_piece(i,j)
-    i -= 1; j -= 1
-    return puts "そこは置けません" unless able_to_put?(i,j)
-    turn_pieces(i,j)
-    field[i][j] = my_color
-    empty_cells.remove_from_empty_cells(i,j)
-  end
-
-  def auto_put_piece
+  def auto_put_request
     sample = turnable(Corner)&.sample
     sample ||= turnable(Side)&.sample
     sample ||= max_or_min_cells(Min,@max_cells_condition).sample if empty_cells.length <= 25
     sample ||= max_or_min_cells(Max,@min_cells_condition).sample if empty_cells.length >= 26
-    i,j = sample[1]+1,sample[2]+1
-    put_piece(i,j)
+    [sample[1]+1,sample[2]+1]
+    # put_piece(i,j)
   end
-
-  # auto_run
-  # def auto_put_piece_v2
-  #   sample = max_or_min_cells_v2(Min,@max_cells_condition).sample
-  #   i,j = sample[1]+1,sample[2]+1
-  #   put_piece(i,j)
-  # end
-
-  # def current_judge
-  #   black,white = count_black_and_white
-  #   puts "黒:#{black},白:#{white}".center(17)
-  #   pass_case_action
-  #   game_over?
-  # end
 
   def puts_field
     cur_stat = Array.new(8){Array.new(8)}
@@ -92,20 +70,15 @@ class Board
     putable_cells
   end
 
-  def pass_case_action
-    if pass?
-      next_turn
-      puts_field
-      puts "#{print_color(my_color)}:パスです。"
-      next_turn
+  def count_black_and_white
+    black,white = 0,0
+    field.each do |line|
+      line.each do |cell|
+        black += 1 if cell == :black
+        white += 1 if cell == :white
+      end
     end
-  end
-
-  def pass?
-    if putable_cells.empty?
-      next_turn
-      return true
-    end
+    [black,white]
   end
 
   def print_color(color)
@@ -116,9 +89,11 @@ class Board
   private
 
     def turn_pieces(i,j)
+      field[i][j] = my_color
       turnable_pieces(i,j).each do |line|
         line.each_slice(2) {|i,j| field[i][j] = my_color }
       end
+      empty_cells.remove_from_empty_cells(i,j)
     end
 
     def able_to_put?(i,j)
@@ -184,33 +159,6 @@ class Board
       ary << [i+a,j+b]
       check_line(i+a,j+b,a,b,ary)
     end
-
-    # def pass_case_action
-    #   if pass?
-    #     next_turn
-    #     puts_field
-    #     puts "#{print_color(my_color)}:パスです。"
-    #     next_turn
-    #   end
-    # end
-    #
-    # def pass?
-    #   if putable_cells.empty?
-    #     next_turn
-    #     return true
-    #   end
-    # end
-
-    # def count_black_and_white
-    #   black,white = 0,0
-    #   field.each do |line|
-    #     line.each do |cell|
-    #       black += 1 if cell == :black
-    #       white += 1 if cell == :white
-    #     end
-    #   end
-    #   [black,white]
-    # end
 
     def puts_field_with_line_numbers(cur_stat)
       puts "#{print_color(my_color)}番" unless game_over?
