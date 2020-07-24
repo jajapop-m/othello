@@ -123,20 +123,20 @@ class Board
       @cells.delete_if{|cell| cell[0]!=m}
     end
 
-    def max_or_min_cells_v2(i,proc)
-      @cells = [i]
-      # empties = empty_cells - Sub_Corner
-      empties = empty_cells # if (putable_cells & empties).empty?
-      empties.each do |i,j|
-        @turnable_num = numbers_of_turnable_pieces(i,j)
-        if proc.call
-          @cells[0] = @turnable_num
-          @cells << [@turnable_num,i,j]
-        end
-      end
-      m = @cells.shift
-      @cells.delete_if{|cell| cell[0]!=m}
-    end
+    # def max_or_min_cells_v2(i,proc)
+    #   @cells = [i]
+    #   # empties = empty_cells - Sub_Corner
+    #   empties = empty_cells # if (putable_cells & empties).empty?
+    #   empties.each do |i,j|
+    #     @turnable_num = numbers_of_turnable_pieces(i,j)
+    #     if proc.call
+    #       @cells[0] = @turnable_num
+    #       @cells << [@turnable_num,i,j]
+    #     end
+    #   end
+    #   m = @cells.shift
+    #   @cells.delete_if{|cell| cell[0]!=m}
+    # end
 
     def numbers_of_turnable_pieces(i,j)
       num = 0
@@ -234,7 +234,7 @@ class Board
 end
 
 class Piece
-  attr_accessor :color
+  attr_accessor :color, :openness
 end
 
 class Array
