@@ -8,6 +8,18 @@ class Othello
     mode_select
   end
 
+  def game_over?
+    black,white = board.count_black_and_white
+    if board.game_set?
+      puts "黒:#{black},白:#{white}".center(17)
+      puts "引き分け".center(17) if black == white
+      return board.even += 1          if black == white
+      puts black < white ? "白の勝ち".center(17) : "黒の勝ち".center(17)
+      return black < white ? (board.white_win += 1) : (board.black_win += 1)
+    end
+    false
+  end
+
   private
 
     def mode_select

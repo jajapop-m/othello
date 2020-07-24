@@ -173,18 +173,6 @@ class Board
       return "白" if color == :white
     end
 
-    def game_over?
-      black,white = count_black_and_white
-      if game_set?
-        puts "黒:#{black},白:#{white}".center(17)
-        puts "引き分け".center(17) if black == white
-        return @even += 1          if black == white
-        puts black < white ? "白の勝ち".center(17) : "黒の勝ち".center(17)
-        return black < white ? (@white_win += 1) : (@black_win += 1)
-      end
-      false
-    end
-
     def pass_case_action
       if pass?
         next_turn
