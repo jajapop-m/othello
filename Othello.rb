@@ -12,12 +12,12 @@ class Othello
     black,white = count_black_and_white
     puts "黒:#{black},白:#{white}".center(17)
     board.pass_case_action
-    game_over?
+    if_gameover_puts_result
   end
 
-  def game_over?
+  def if_gameover_puts_result
     black,white = count_black_and_white
-    if board.game_set?
+    if board.game_over?
       puts "黒:#{black},白:#{white}".center(17)
       puts "引き分け".center(17) if black == white
       return board.even += 1          if black == white
@@ -81,9 +81,9 @@ class Othello
     def self.define_vs_method(computer_or_man1,computer_or_man2)
       define_method("#{computer_or_man1}_vs_#{computer_or_man2}") do
         send "#{computer_or_man1}_turn"
-        return ask_continue? if board.game_set?
+        return ask_continue? if board.game_over?
         send "#{computer_or_man2}_turn"
-        return ask_continue? if board.game_set?
+        return ask_continue? if board.game_over?
         send "#{computer_or_man1}_vs_#{computer_or_man2}"
       end
     end

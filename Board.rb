@@ -74,7 +74,7 @@ class Board
     puts_field_with_line_numbers(cur_stat)
   end
 
-  def game_set?
+  def game_over?
     if putable_cells.empty?
       next_turn
       return true if putable_cells.empty?
@@ -213,7 +213,7 @@ class Board
     # end
 
     def puts_field_with_line_numbers(cur_stat)
-      puts "#{print_color(my_color)}番" unless game_set?
+      puts "#{print_color(my_color)}番" unless game_over?
       cur_stat_with_line_numbers = Array.new(8){Array.new(8)}
       cur_stat.each_with_index do |line,i|
         cur_stat_with_line_numbers[i] = line.unshift(i+1)
