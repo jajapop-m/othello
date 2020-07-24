@@ -1,5 +1,5 @@
 class Board
-  attr_accessor :piece, :field, :my_color, :enemy_color, :empty_cells, :black_win, :white_win, :even
+  attr_accessor :piece, :field, :empty_cells, :my_color, :enemy_color, :black_win, :white_win, :even, :othello
   Max, Min = 64, 0
   Corner = [[0,0],[0,7],[7,0],[7,7]]
   Side = [[0,2],[0,3],[0,4],[0,5],[2,0],[2,7],[3,0],[3,7],[4,0],[4,7],[5,0],[5,7],[7,2],[7,3],[7,4],[7,5]]
@@ -27,38 +27,12 @@ class Board
     (center_b + center_w).each {|i,j| empty_cells.remove_from_empty_cells(i,j)}
   end
 
-  def next_turn
-    @my_color, @enemy_color = enemy_color, my_color
-  end
-
   def auto_put_request
     sample = turnable(Corner)&.sample
     sample ||= turnable(Side)&.sample
     sample ||= max_or_min_cells(Min,@max_cells_condition).sample if empty_cells.length <= 25
     sample ||= max_or_min_cells(Max,@min_cells_condition).sample if empty_cells.length >= 26
     [sample[1]+1,sample[2]+1]
-    # put_piece(i,j)
-  end
-
-  def puts_field
-    cur_stat = Array.new(8){Array.new(8)}
-    field.each_with_index do |line,i|
-      line.each_with_index do |cell,j|
-        next cur_stat[i][j] = "□".to_s.rjust(2) if cell == :none
-        next cur_stat[i][j] = "●".to_s.rjust(2) if cell == :black
-        next cur_stat[i][j] = "◎".to_s.rjust(2) if cell == :white
-      end
-    end
-    puts_field_with_line_numbers(cur_stat)
-  end
-
-  def game_over?
-    if putable_cells.empty?
-      next_turn
-      return true if putable_cells.empty?
-      next_turn
-    end
-    false
   end
 
   def putable_cells
@@ -81,24 +55,50 @@ class Board
     [black,white]
   end
 
-  def print_color(color)
-    return "黒" if color == :black
-    return "白" if color == :white
+
+  def able_to_put?(i,j)
+    putable_cells.include?([i,j])
+  end
+
+  def put_and_turn_pieces(i,j)
+    field[i][j] = my_color
+    turnable_pieces(i,j).each do |line|
+      line.each_slice(2) {|i,j| field[i][j] = my_color }
+    end
+    empty_cells.remove_from_empty_cells(i,j)
+  end
+
+  def game_over?
+    if putable_cells.empty?
+      next_turn
+      return true if putable_cells.empty?
+      next_turn
+    end
+    false
+  end
+
+  def game_over_results
+    if game_over?
+      black, white = count_black_and_white
+      if black == white
+        @even += 1
+        return [:even, black, white]
+      elsif black < white
+        @white_win += 1
+        return [:white, black, white]
+      else
+        @black_win += 1
+        return [:black, black, white]
+      end
+    end
+    nil
+  end
+
+  def next_turn
+    @my_color, @enemy_color = enemy_color, my_color
   end
 
   private
-
-    def turn_pieces(i,j)
-      field[i][j] = my_color
-      turnable_pieces(i,j).each do |line|
-        line.each_slice(2) {|i,j| field[i][j] = my_color }
-      end
-      empty_cells.remove_from_empty_cells(i,j)
-    end
-
-    def able_to_put?(i,j)
-      putable_cells.include?([i,j])
-    end
 
     def max_or_min_cells(i,proc)
       @cells = [i]
@@ -158,22 +158,6 @@ class Board
       return @change_color_stocks << ary.flatten if field[i+a][j+b] == my_color
       ary << [i+a,j+b]
       check_line(i+a,j+b,a,b,ary)
-    end
-
-    def puts_field_with_line_numbers(cur_stat)
-      puts "#{print_color(my_color)}番" unless game_over?
-      cur_stat_with_line_numbers = Array.new(8){Array.new(8)}
-      cur_stat.each_with_index do |line,i|
-        cur_stat_with_line_numbers[i] = line.unshift(i+1)
-      end
-      cur_stat_with_line_numbers.unshift([*1..8])[0].unshift(" ")
-      cur_stat_with_line_numbers.each do |line|
-        line.each do |l|
-          print l.to_s.rjust(2)
-        end
-        puts "\r"
-      end
-      nil
     end
 
     def within_range(i,j)
