@@ -92,6 +92,22 @@ class Board
     putable_cells
   end
 
+  def pass_case_action
+    if pass?
+      next_turn
+      puts_field
+      puts "#{print_color(my_color)}:パスです。"
+      next_turn
+    end
+  end
+
+  def pass?
+    if putable_cells.empty?
+      next_turn
+      return true
+    end
+  end
+
   def print_color(color)
     return "黒" if color == :black
     return "白" if color == :white

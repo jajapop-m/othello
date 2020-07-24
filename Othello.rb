@@ -11,7 +11,7 @@ class Othello
   def current_judge
     black,white = count_black_and_white
     puts "黒:#{black},白:#{white}".center(17)
-    pass_case_action
+    board.pass_case_action
     game_over?
   end
 
@@ -38,22 +38,6 @@ class Othello
         end
       end
       [black,white]
-    end
-
-    def pass_case_action
-      if pass?
-        board.next_turn
-        board.puts_field
-        puts "#{board.print_color(board.my_color)}:パスです。"
-        board.next_turn
-      end
-    end
-
-    def pass?
-      if board.putable_cells.empty?
-        board.next_turn
-        return true
-      end
     end
 
     def mode_select
