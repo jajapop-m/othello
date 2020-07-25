@@ -28,10 +28,11 @@ class Board
       end
     end
     (center_b + center_w).each {|i,j| empty_cells.remove_from_empty_cells(i,j)}
-    calcurate_openness(3,3)
-    calcurate_openness(3,4)
-    calcurate_openness(4,3)
-    calcurate_openness(4,4)
+    piece(3,3).openness = 5
+    piece(3,4).openness = 5
+    piece(4,3).openness = 5
+    piece(4,4).openness = 5
+    p all_pieces
   end
 
   def next_turn
@@ -106,10 +107,15 @@ class Board
   end
 
   def calcurate_openness(i,j)
+    count = 0
     Around_the_piece.each do |a,b|
-      next unless within_range?(a,b)
-      piece(a,b).openness -= 1 unless piece(a,b)&.color?(:none)
+      next unless within_range?(i+a,j+b)
+      if piece(i+a,j+b)&.color?(:black) || piece(i+a,j+b)&.color?(:white)
+        piece(i+a,j+b).openness -= 1
+        count += 1
+      end
     end
+    piece(i,j).openness -= count
   end
 
   private
@@ -135,8 +141,10 @@ class Board
 
     def sum_openness(i,j)
       sum = 0
-      turnable_pieces(i,j).each do |i,j|
-        sum += piece(i,j).openness
+      p turnable_pieces(i,j)
+      turnable_pieces(i,j).each do |a,b|
+        p [piece(a,b), piece(a,b).openness]
+        sum += piece(a,b).openness
       end
       sum
     end
@@ -145,10 +153,12 @@ class Board
       openness_list = []
       min_openness = 100
       putable_cells.each do |i,j|
+        p [i,j]
         res = sum_openness(i,j)
         min_openness = res if min_openness > res
         openness_list << [res,i,j]
       end
+      p openness_list
       openness_list.delete_if{|list| list[0] != min_openness}
       p openness_list
       openness_list
