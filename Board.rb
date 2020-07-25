@@ -13,10 +13,6 @@ class Board
     @min_cells_condition = -> {@turnable_num != 0 && @cells[0] >= @turnable_num}
   end
 
-  def piece(i,j)
-    all_pieces[i][j]
-  end
-
   def game_init
     center_b = [[3,3],[4,4]]
     center_w = [[3,4],[4,3]]
@@ -112,6 +108,10 @@ class Board
 
   private
 
+    def piece(i,j)
+      all_pieces[i][j]
+    end
+
     def max_or_min_cells(i,proc)
       @cells = [i]
       empties = empty_cells - Sub_Corner
@@ -151,7 +151,7 @@ class Board
     def turnable_pieces(i,j)
       @change_color_stocks = []
       Around_the_piece.each do |a,b|
-        check_line_if_turnable(i,j,a,b,ary=[]) if within_range(i+a,j+b) && piece(i+a,j+b).color == enemy_color
+        check_line_if_turnable(i,j,a,b,ary=[]) if within_range(i+a,j+b) && piece(i+a,j+b).color?(enemy_color)
       end
       @change_color_stocks
     end
@@ -166,8 +166,8 @@ class Board
     end
 
     def check_line_if_turnable(i,j,a,b,ary)
-      return ary.clear if !within_range(i+a,j+b) || piece(i+a,j+b).color == :none
-      return @change_color_stocks << ary.flatten if piece(i+a,j+b).color == my_color
+      return ary.clear if !within_range(i+a,j+b) || piece(i+a,j+b).color?(:none)
+      return @change_color_stocks << ary.flatten if piece(i+a,j+b).color?(my_color)
       ary << [i+a,j+b]
       check_line_if_turnable(i+a,j+b,a,b,ary)
     end
@@ -182,6 +182,10 @@ class Piece
   def initialize
     @color = :none
     @openness = 9
+  end
+
+  def color?(c)
+    color == c
   end
 end
 
