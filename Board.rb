@@ -1,6 +1,6 @@
 class Board
   attr_accessor :all_pieces, :all_cells, :empty_cells, :my_color, :enemy_color, :black_win, :white_win, :even, :othello
-  Max, Min = 64, 0
+  Min, Max = 64, 0
   Corner = [[0,0],[0,7],[7,0],[7,7]]
   Side = [[0,2],[0,3],[0,4],[0,5],[2,0],[2,7],[3,0],[3,7],[4,0],[4,7],[5,0],[5,7],[7,2],[7,3],[7,4],[7,5]]
   Sub_Corner = [[0,1],[0,6],[1,0],[1,1],[1,6],[1,7],[6,0],[6,1],[6,6],[6,7],[7,1],[7,6]]
@@ -28,7 +28,10 @@ class Board
       end
     end
     (center_b + center_w).each {|i,j| empty_cells.remove_from_empty_cells(i,j)}
-    calcurate_openness
+    calcurate_openness(3,3)
+    calcurate_openness(3,4)
+    calcurate_openness(4,3)
+    calcurate_openness(4,4)
   end
 
   def next_turn
@@ -38,8 +41,9 @@ class Board
   def auto_put_request
     sample = turnable(Corner)&.sample
     sample ||= turnable(Side)&.sample
-    sample ||= max_or_min_cells(Min, @max_cells_condition).sample if empty_cells.length <= 25
-    sample ||= max_or_min_cells(Max, @min_cells_condition).sample if empty_cells.length >= 26
+    sample ||= max_or_min_cells(Max, @max_cells_condition).sample if empty_cells.length <= 20
+    sample ||= (max_or_min_cells(Min, @min_cells_condition) & get_min_openness_cells).sample if empty_cells.length >= 40
+    sample ||= max_or_min_cells(Min, @min_cells_condition).sample if empty_cells.length >= 21
     [sample[1]+1,sample[2]+1]
   end
 
@@ -101,11 +105,10 @@ class Board
     nil
   end
 
-  def calcurate_openness
-    (all_cells - empty_cells).each do |i,j|
-      Around_the_piece.each do |a,b|
-        piece(i,j).openness -= 1 unless piece(i+a,j+b)&.color?(:none)
-      end
+  def calcurate_openness(i,j)
+    Around_the_piece.each do |a,b|
+      next unless within_range?(a,b)
+      piece(a,b).openness -= 1 unless piece(a,b)&.color?(:none)
     end
   end
 
@@ -128,6 +131,27 @@ class Board
       end
       m = @cells.shift
       @cells.delete_if{|cell| cell[0]!=m}
+    end
+
+    def sum_openness(i,j)
+      sum = 0
+      turnable_pieces(i,j).each do |i,j|
+        sum += piece(i,j).openness
+      end
+      sum
+    end
+
+    def get_min_openness_cells
+      openness_list = []
+      min_openness = 100
+      putable_cells.each do |i,j|
+        res = sum_openness(i,j)
+        min_openness = res if min_openness > res
+        openness_list << [res,i,j]
+      end
+      openness_list.delete_if{|list| list[0] != min_openness}
+      p openness_list
+      openness_list
     end
 
     # def max_or_min_cells_v2(i,proc)
@@ -184,7 +208,7 @@ class Piece
   attr_accessor :color, :openness
   def initialize
     @color = :none
-    @openness = 9
+    @openness = 8
   end
 
   def color?(c)

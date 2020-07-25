@@ -95,7 +95,7 @@ class Othello
       i -= 1; j -= 1
       return puts "そこは置けません" unless board.able_to_put?(i,j)
       board.put_and_turn_pieces(i,j)
-      board.calcurate_openness
+      board.calcurate_openness(i,j)
     end
 
     def after_put_piece
