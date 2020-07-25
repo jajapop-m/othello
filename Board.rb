@@ -47,6 +47,11 @@ class Board
     [sample[1]+1,sample[2]+1]
   end
 
+  def auto_put_request_v2
+    sample ||= max_or_min_cells(Max, @max_cells_condition).sample
+    [sample[1]+1,sample[2]+1]
+  end
+
   def putable_cells
     putable_cells = []
     empty_cells.each do |i,j|
@@ -71,9 +76,9 @@ class Board
   def count_black_and_white
     black,white = 0,0
     all_pieces.each do |line|
-      line.each do |cell|
-        black += 1 if cell == :black
-        white += 1 if cell == :white
+      line.each do |piece|
+        black += 1 if piece.color? :black
+        white += 1 if piece.color? :white
       end
     end
     [black,white]
@@ -158,20 +163,20 @@ class Board
       openness_list
     end
 
-    # def max_or_min_cells_v2(i,proc)
-    #   @cells = [i]
-    #   # empties = empty_cells - Sub_Corner
-    #   empties = empty_cells # if (putable_cells & empties).empty?
-    #   empties.each do |i,j|
-    #     @turnable_num = numbers_of_turnable_pieces(i,j)
-    #     if proc.call
-    #       @cells[0] = @turnable_num
-    #       @cells << [@turnable_num,i,j]
-    #     end
-    #   end
-    #   m = @cells.shift
-    #   @cells.delete_if{|cell| cell[0]!=m}
-    # end
+    def max_or_min_cells_v2(i,proc)
+      @cells = [i]
+      # empties = empty_cells - Sub_Corner
+      empties = empty_cells # if (putable_cells & empties).empty?
+      empties.each do |i,j|
+        @turnable_num = numbers_of_turnable_pieces(i,j)
+        if proc.call
+          @cells[0] = @turnable_num
+          @cells << [@turnable_num,i,j]
+        end
+      end
+      m = @cells.shift
+      @cells.delete_if{|cell| cell[0]!=m}
+    end
 
     def numbers_of_turnable_pieces(i,j)
       num = 0

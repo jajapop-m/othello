@@ -62,7 +62,7 @@ class Othello
       define_vs_method(cm1,cm2)
     end
 
-    # define_vs_method(:computer,:computer2)
+    define_vs_method(:computer,:computer2)
 
     def man_turn
       put_request
@@ -75,10 +75,11 @@ class Othello
       after_put_piece
     end
 
-    # def computer2_turn
-    #   board.auto_put_piece_v2
-    #   after_put_piece
-    # end
+    def computer2_turn
+      i,j = board.auto_put_request_v2
+      put_piece(i,j)
+      after_put_piece
+    end
 
     def put_request
       print "縦 横: "
