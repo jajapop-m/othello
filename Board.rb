@@ -28,6 +28,7 @@ class Board
       end
     end
     (center_b + center_w).each {|i,j| empty_cells.remove_from_empty_cells(i,j)}
+    calcurate_openness
   end
 
   def next_turn
@@ -102,14 +103,16 @@ class Board
 
   def calcurate_openness
     (all_cells - empty_cells).each do |i,j|
-
+      Around_the_piece.each do |a,b|
+        piece(i,j).openness -= 1 unless piece(i+a,j+b)&.color?(:none)
+      end
     end
   end
 
   private
 
     def piece(i,j)
-      all_pieces[i][j]
+      all_pieces[i][j] if within_range?(i,j)
     end
 
     def max_or_min_cells(i,proc)
@@ -151,7 +154,7 @@ class Board
     def turnable_pieces(i,j)
       @change_color_stocks = []
       Around_the_piece.each do |a,b|
-        check_line_if_turnable(i,j,a,b,ary=[]) if within_range(i+a,j+b) && piece(i+a,j+b).color?(enemy_color)
+        check_line_if_turnable(i,j,a,b,ary=[]) if within_range?(i+a,j+b) && piece(i+a,j+b).color?(enemy_color)
       end
       @change_color_stocks
     end
@@ -166,13 +169,13 @@ class Board
     end
 
     def check_line_if_turnable(i,j,a,b,ary)
-      return ary.clear if !within_range(i+a,j+b) || piece(i+a,j+b).color?(:none)
+      return ary.clear if !within_range?(i+a,j+b) || piece(i+a,j+b).color?(:none)
       return @change_color_stocks << ary.flatten if piece(i+a,j+b).color?(my_color)
       ary << [i+a,j+b]
       check_line_if_turnable(i+a,j+b,a,b,ary)
     end
 
-    def within_range(i,j)
+    def within_range?(i,j)
       i<8 && j<8 && i>=0 && j>=0
     end
 end
