@@ -32,7 +32,6 @@ class Board
     piece(3,4).openness = 5
     piece(4,3).openness = 5
     piece(4,4).openness = 5
-    p all_pieces
   end
 
   def next_turn
@@ -141,9 +140,7 @@ class Board
 
     def sum_openness(i,j)
       sum = 0
-      p turnable_pieces(i,j)
       turnable_pieces(i,j).each do |a,b|
-        p [piece(a,b), piece(a,b).openness]
         sum += piece(a,b).openness
       end
       sum
@@ -153,14 +150,11 @@ class Board
       openness_list = []
       min_openness = 100
       putable_cells.each do |i,j|
-        p [i,j]
         res = sum_openness(i,j)
         min_openness = res if min_openness > res
         openness_list << [res,i,j]
       end
-      p openness_list
       openness_list.delete_if{|list| list[0] != min_openness}
-      p openness_list
       openness_list
     end
 
