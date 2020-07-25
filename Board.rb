@@ -1,6 +1,5 @@
 class Board
   attr_accessor :all_pieces, :all_cells, :empty_cells, :my_color, :enemy_color, :black_win, :white_win, :even, :othello
-  alias_method :piece, :all_pieces
   Max, Min = 64, 0
   Corner = [[0,0],[0,7],[7,0],[7,7]]
   Side = [[0,2],[0,3],[0,4],[0,5],[2,0],[2,7],[3,0],[3,7],[4,0],[4,7],[5,0],[5,7],[7,2],[7,3],[7,4],[7,5]]
@@ -14,12 +13,16 @@ class Board
     @min_cells_condition = -> {@turnable_num != 0 && @cells[0] >= @turnable_num}
   end
 
+  def piece(i,j)
+    all_pieces[i][j]
+  end
+
   def game_init
     center_b = [[3,3],[4,4]]
     center_w = [[3,4],[4,3]]
-    @all_pieces = Array.new(8){Array.new(8,:none)}
-    center_b.each{|i,j| piece[i][j] = :black}
-    center_w.each{|i,j| piece[i][j] = :white}
+    @all_pieces = Array.new(8){Array.new(8){Piece.new}}
+    center_b.each{|i,j| piece(i,j).color = :black}
+    center_w.each{|i,j| piece(i,j).color = :white}
     @my_color, @enemy_color = :black, :white
     @empty_cells = [] ; @all_cells = []
     (0..7).each do |i|
@@ -38,8 +41,8 @@ class Board
   def auto_put_request
     sample = turnable(Corner)&.sample
     sample ||= turnable(Side)&.sample
-    sample ||= max_or_min_cells(Min,@max_cells_condition).sample if empty_cells.length <= 25
-    sample ||= max_or_min_cells(Max,@min_cells_condition).sample if empty_cells.length >= 26
+    sample ||= max_or_min_cells(Min, @max_cells_condition).sample if empty_cells.length <= 25
+    sample ||= max_or_min_cells(Max, @min_cells_condition).sample if empty_cells.length >= 26
     [sample[1]+1,sample[2]+1]
   end
 
@@ -53,9 +56,9 @@ class Board
   end
 
   def put_and_turn_pieces(i,j)
-    piece[i][j] = my_color
+    piece(i,j).color = my_color
     turnable_pieces(i,j).each do |line|
-      line.each_slice(2) {|i,j| piece[i][j] = my_color }
+      line.each_slice(2) {|i,j| piece(i,j).color = my_color }
     end
     empty_cells.remove_from_empty_cells(i,j)
   end
@@ -66,7 +69,7 @@ class Board
 
   def count_black_and_white
     black,white = 0,0
-    piece.each do |line|
+    all_pieces.each do |line|
       line.each do |cell|
         black += 1 if cell == :black
         white += 1 if cell == :white
@@ -148,7 +151,7 @@ class Board
     def turnable_pieces(i,j)
       @change_color_stocks = []
       Around_the_piece.each do |a,b|
-        check_line_if_turnable(i,j,a,b,ary=[]) if within_range(i+a,j+b) && piece[i+a][j+b] == enemy_color
+        check_line_if_turnable(i,j,a,b,ary=[]) if within_range(i+a,j+b) && piece(i+a,j+b).color == enemy_color
       end
       @change_color_stocks
     end
@@ -163,8 +166,8 @@ class Board
     end
 
     def check_line_if_turnable(i,j,a,b,ary)
-      return ary.clear if !within_range(i+a,j+b) || piece[i+a][j+b] == :none
-      return @change_color_stocks << ary.flatten if piece[i+a][j+b] == my_color
+      return ary.clear if !within_range(i+a,j+b) || piece(i+a,j+b).color == :none
+      return @change_color_stocks << ary.flatten if piece(i+a,j+b).color == my_color
       ary << [i+a,j+b]
       check_line_if_turnable(i+a,j+b,a,b,ary)
     end
@@ -177,6 +180,7 @@ end
 class Piece
   attr_accessor :color, :openness
   def initialize
+    @color = :none
     @openness = 9
   end
 end

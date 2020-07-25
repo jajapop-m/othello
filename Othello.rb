@@ -130,10 +130,10 @@ class Othello
     def puts_field
       cur_stat = Array.new(8){Array.new(8)}
       board.all_pieces.each_with_index do |line,i|
-        line.each_with_index do |cell,j|
-          next cur_stat[i][j] = "□".to_s.rjust(2) if cell == :none
-          next cur_stat[i][j] = "●".to_s.rjust(2) if cell == :black
-          next cur_stat[i][j] = "◎".to_s.rjust(2) if cell == :white
+        line.each_with_index do |p,j|
+          next cur_stat[i][j] = "□".to_s.rjust(2) if p.color == :none
+          next cur_stat[i][j] = "●".to_s.rjust(2) if p.color == :black
+          next cur_stat[i][j] = "◎".to_s.rjust(2) if p.color == :white
         end
       end
       puts_field_with_line_numbers(cur_stat)
