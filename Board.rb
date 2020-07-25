@@ -1,9 +1,11 @@
 class Board
-  attr_accessor :piece, :field, :empty_cells, :my_color, :enemy_color, :black_win, :white_win, :even, :othello
+  attr_accessor :piece, :all_cells, :empty_cells, :my_color, :enemy_color, :black_win, :white_win, :even, :othello
   Max, Min = 64, 0
   Corner = [[0,0],[0,7],[7,0],[7,7]]
   Side = [[0,2],[0,3],[0,4],[0,5],[2,0],[2,7],[3,0],[3,7],[4,0],[4,7],[5,0],[5,7],[7,2],[7,3],[7,4],[7,5]]
   Sub_Corner = [[0,1],[0,6],[1,0],[1,1],[1,6],[1,7],[6,0],[6,1],[6,6],[6,7],[7,1],[7,6]]
+  Around_the_piece = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]]
+  
   def initialize
     game_init
     @black_win, @white_win, @even = 0,0,0
@@ -14,14 +16,15 @@ class Board
   def game_init
     center_b = [[3,3],[4,4]]
     center_w = [[3,4],[4,3]]
-    @field = Array.new(8){Array.new(8,:none)}
-    center_b.each{|i,j| field[i][j] = :black}
-    center_w.each{|i,j| field[i][j] = :white}
+    @piece = Array.new(8){Array.new(8,:none)}
+    center_b.each{|i,j| piece[i][j] = :black}
+    center_w.each{|i,j| piece[i][j] = :white}
     @my_color, @enemy_color = :black, :white
-    @empty_cells = []
+    @empty_cells = [] ; @all_cells = []
     (0..7).each do |i|
       (0..7).each do |j|
         empty_cells << [i,j]
+        all_cells << [i,j]
       end
     end
     (center_b + center_w).each {|i,j| empty_cells.remove_from_empty_cells(i,j)}
@@ -48,27 +51,27 @@ class Board
     putable_cells
   end
 
-  def count_black_and_white
-    black,white = 0,0
-    field.each do |line|
-      line.each do |cell|
-        black += 1 if cell == :black
-        white += 1 if cell == :white
-      end
-    end
-    [black,white]
-  end
-
   def put_and_turn_pieces(i,j)
-    field[i][j] = my_color
+    piece[i][j] = my_color
     turnable_pieces(i,j).each do |line|
-      line.each_slice(2) {|i,j| field[i][j] = my_color }
+      line.each_slice(2) {|i,j| piece[i][j] = my_color }
     end
     empty_cells.remove_from_empty_cells(i,j)
   end
 
   def able_to_put?(i,j)
     putable_cells.include?([i,j])
+  end
+
+  def count_black_and_white
+    black,white = 0,0
+    piece.each do |line|
+      line.each do |cell|
+        black += 1 if cell == :black
+        white += 1 if cell == :white
+      end
+    end
+    [black,white]
   end
 
   def game_over?
@@ -95,6 +98,12 @@ class Board
       end
     end
     nil
+  end
+
+  def calcurate_openness
+    (all_cells - empty_cells).each do |i,j|
+
+    end
   end
 
   private
@@ -137,8 +146,8 @@ class Board
 
     def turnable_pieces(i,j)
       @change_color_stocks = []
-      [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]].each do |a,b|
-        check_line_if_turnable(i,j,a,b,ary=[]) if within_range(i+a,j+b) && field[i+a][j+b] == enemy_color
+      Around_the_piece.each do |a,b|
+        check_line_if_turnable(i,j,a,b,ary=[]) if within_range(i+a,j+b) && piece[i+a][j+b] == enemy_color
       end
       @change_color_stocks
     end
@@ -153,8 +162,8 @@ class Board
     end
 
     def check_line_if_turnable(i,j,a,b,ary)
-      return ary.clear if !within_range(i+a,j+b) || field[i+a][j+b] == :none
-      return @change_color_stocks << ary.flatten if field[i+a][j+b] == my_color
+      return ary.clear if !within_range(i+a,j+b) || piece[i+a][j+b] == :none
+      return @change_color_stocks << ary.flatten if piece[i+a][j+b] == my_color
       ary << [i+a,j+b]
       check_line_if_turnable(i+a,j+b,a,b,ary)
     end
