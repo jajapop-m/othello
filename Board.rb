@@ -41,14 +41,14 @@ class Board
   def auto_put_request
     sample = turnable(Corner)&.sample
     sample ||= turnable(Side)&.sample
-    sample ||= max_or_min_cells(Max, @max_cells_condition).sample if empty_cells.length <= 20
+    sample ||= max_or_min_cells(Max, @max_cells_condition).sample if empty_cells.length <= 25
     sample ||= (max_or_min_cells(Min, @min_cells_condition) & get_min_openness_cells).sample if empty_cells.length >= 40
-    sample ||= max_or_min_cells(Min, @min_cells_condition).sample if empty_cells.length >= 21
+    sample ||= max_or_min_cells(Min, @min_cells_condition).sample if empty_cells.length >= 26
     [sample[1]+1,sample[2]+1]
   end
 
   def auto_put_request_v2
-    sample ||= max_or_min_cells(Max, @max_cells_condition).sample
+    sample = max_or_min_cells(Max, @max_cells_condition).sample
     [sample[1]+1,sample[2]+1]
   end
 

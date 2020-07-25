@@ -23,8 +23,8 @@ class Othello
         man_vs_man
       when 3
         puts_field
-        computer_vs_computer
-        # computer_vs_computer2
+        # computer_vs_computer
+        computer_vs_computer2
       else
         puts "もう一度入力して下さい。"
         mode_select
@@ -65,17 +65,20 @@ class Othello
     define_vs_method(:computer,:computer2)
 
     def man_turn
+      return if if_pass_next_turn
       put_request
       after_put_piece
     end
 
     def computer_turn
+      return if if_pass_next_turn
       i,j = board.auto_put_request
       put_piece(i,j)
       after_put_piece
     end
 
     def computer2_turn
+      return if if_pass_next_turn
       i,j = board.auto_put_request_v2
       put_piece(i,j)
       after_put_piece
@@ -102,7 +105,6 @@ class Othello
     def after_put_piece
       board.next_turn
       puts_current_situation
-      if_pass_next_turn
       if_gameover_puts_result
       puts_field
     end
@@ -113,11 +115,15 @@ class Othello
     end
 
     def if_pass_next_turn
+      return if board.game_over?
       if board.putable_cells.empty?
-        puts_field
         puts "#{print_color(board.my_color)}:パスです。"
         board.next_turn
+        puts_current_situation
+        puts_field
+        return true
       end
+      false
     end
 
     def if_gameover_puts_result
@@ -161,8 +167,8 @@ class Othello
       puts "黒#{board.black_win},白#{board.white_win},引き分け#{board.even}"
       puts "もう一度プレイしますか？"
       puts "1 はい, 2 いいえ (番号を入力して下さい)"
-      i = gets.to_i
-      # i = 1
+      # i = gets.to_i
+      i = 1
       case i
       when 1
         board.game_init
