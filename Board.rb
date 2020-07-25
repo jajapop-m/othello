@@ -1,11 +1,12 @@
 class Board
-  attr_accessor :piece, :all_cells, :empty_cells, :my_color, :enemy_color, :black_win, :white_win, :even, :othello
+  attr_accessor :all_pieces, :all_cells, :empty_cells, :my_color, :enemy_color, :black_win, :white_win, :even, :othello
+  alias_method :piece, :all_pieces
   Max, Min = 64, 0
   Corner = [[0,0],[0,7],[7,0],[7,7]]
   Side = [[0,2],[0,3],[0,4],[0,5],[2,0],[2,7],[3,0],[3,7],[4,0],[4,7],[5,0],[5,7],[7,2],[7,3],[7,4],[7,5]]
   Sub_Corner = [[0,1],[0,6],[1,0],[1,1],[1,6],[1,7],[6,0],[6,1],[6,6],[6,7],[7,1],[7,6]]
   Around_the_piece = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]]
-  
+
   def initialize
     game_init
     @black_win, @white_win, @even = 0,0,0
@@ -16,7 +17,7 @@ class Board
   def game_init
     center_b = [[3,3],[4,4]]
     center_w = [[3,4],[4,3]]
-    @piece = Array.new(8){Array.new(8,:none)}
+    @all_pieces = Array.new(8){Array.new(8,:none)}
     center_b.each{|i,j| piece[i][j] = :black}
     center_w.each{|i,j| piece[i][j] = :white}
     @my_color, @enemy_color = :black, :white

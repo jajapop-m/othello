@@ -129,7 +129,7 @@ class Othello
 
     def puts_field
       cur_stat = Array.new(8){Array.new(8)}
-      board.piece.each_with_index do |line,i|
+      board.all_pieces.each_with_index do |line,i|
         line.each_with_index do |cell,j|
           next cur_stat[i][j] = "□".to_s.rjust(2) if cell == :none
           next cur_stat[i][j] = "●".to_s.rjust(2) if cell == :black
