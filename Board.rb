@@ -2,9 +2,11 @@ class Board
   attr_accessor :all_pieces, :all_cells, :empty_cells, :my_color, :enemy_color, :black_win, :white_win, :even, :othello
   Min, Max = 64, 0
   Corner = [[0,0],[0,7],[7,0],[7,7]]
-  Side = [[0,2],[0,3],[0,4],[0,5],[2,0],[2,7],[3,0],[3,7],[4,0],[4,7],[5,0],[5,7],[7,2],[7,3],[7,4],[7,5]]
   Sub_Corner = [[0,1],[0,6],[1,0],[1,1],[1,6],[1,7],[6,0],[6,1],[6,6],[6,7],[7,1],[7,6]]
   Second_Corner = [[1,1],[1,6],[6,1],[6,6]]
+  Four_corners = [[[0,0],[0,1],[1,0],[1,1]], [[0,6],[0,7],[1,6],[1,7]], [[6,0],[6,1],[7,0],[7,1]], [[6,6],[6,7],[7,6],[7,7]]]
+  Side = [[0,2],[0,3],[0,4],[0,5],[2,0],[2,7],[3,0],[3,7],[4,0],[4,7],[5,0],[5,7],[7,2],[7,3],[7,4],[7,5]]
+  Inner_Side = [[1,2],[1,3],[1,4],[1,5],[2,1],[2,6],[3,1],[3,6],[4,1],[4,6],[5,1],[5,6],[6,2],[6,3],[6,4],[6,5]]
   Around_the_piece = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]]
 
   def initialize
@@ -29,10 +31,7 @@ class Board
       end
     end
     (center_b + center_w).each {|i,j| empty_cells.remove_from_empty_cells(i,j)}
-    piece(3,3).openness = 5
-    piece(3,4).openness = 5
-    piece(4,3).openness = 5
-    piece(4,4).openness = 5
+    (center_b + center_w).each {|i,j| piece(i,j).openness = 5}
   end
 
   def next_turn
@@ -40,7 +39,8 @@ class Board
   end
 
   def auto_put_request
-    sample = only_one_corner_cell&.sample if closing_stage
+    sample = if_two_remain_get_better_move&.sample
+    sample ||= only_one_corner_cell&.sample if closing_stage
     sample ||= turnable(Corner)&.sample
     sample ||= get_min_inner_sides(turnable(Side))&.sample if middle_stage
     sample ||= turnable(Side)&.sample
@@ -55,7 +55,8 @@ class Board
     # sample = max_or_min_cells_v2(Max, @max_cells_condition).sample
     # [sample[1]+1,sample[2]+1]
 
-    sample = only_one_corner_cell&.sample if closing_stage
+    sample = if_two_remain_get_better_move&.sample
+    sample ||= only_one_corner_cell&.sample if closing_stage
     sample ||= turnable(Corner)&.sample
     sample ||= get_min_inner_sides(turnable(Side))&.sample if middle_stage
     sample ||= turnable(Side)&.sample
@@ -171,9 +172,9 @@ class Board
 
     def max_or_min_cells_v2(i,proc)
       @cells = [i]
-      empties = empty_cells - Sub_Corner
-      empties = empty_cells - Second_Corner if (putable_cells & empties).empty?
-      empties = empty_cells if (putable_cells & empties).empty?
+      # empties = empty_cells - Sub_Corner
+      # empties = empty_cells - Second_Corner if (putable_cells & empties).empty?
+      empties = empty_cells #if (putable_cells & empties).empty?
       empties.each do |i,j|
         @turnable_num = numbers_of_turnable_pieces(i,j)
         if proc.call
@@ -187,8 +188,7 @@ class Board
 
     def only_one_corner_cell
       only_one_corner = []
-      four_corner = [[[0,0],[0,1],[1,0],[1,1]], [[0,6],[0,7],[1,6],[1,7]], [[6,0],[6,1],[7,0],[7,1]], [[6,6],[6,7],[7,6],[7,7]]]
-      four_corner.each do |corner|
+      Four_corners.each do |corner|
         only_one_corner << (corner & empty_cells).map{|a| a.unshift(:only_one)}
       end
       only_one_corner.delete_if{|p| p.length != 1}
@@ -229,6 +229,13 @@ class Board
       @change_color_stocks
     end
 
+    def check_line_if_turnable(i,j,a,b,ary)
+      return ary.clear if !within_range?(i+a,j+b) || piece(i+a,j+b).color?(:none)
+      return @change_color_stocks << ary.flatten if piece(i+a,j+b).color?(my_color)
+      ary << [i+a,j+b]
+      check_line_if_turnable(i+a,j+b,a,b,ary)
+    end
+
     def turnable(c_or_s)
       corners_or_sides =[]
       c_or_s.each do |i,j|
@@ -238,7 +245,6 @@ class Board
       corners_or_sides
     end
 
-    Inner_Side = [[1,2],[1,3],[1,4],[1,5],[2,1],[2,6],[3,1],[3,6],[4,1],[4,6],[5,1],[5,6],[6,2],[6,3],[6,4],[6,5]]
     def get_min_inner_sides(sides)
       return nil if sides.nil?
       min = 16
@@ -256,11 +262,14 @@ class Board
       stock.delete_if{|piece| piece[0] != min}
     end
 
-    def check_line_if_turnable(i,j,a,b,ary)
-      return ary.clear if !within_range?(i+a,j+b) || piece(i+a,j+b).color?(:none)
-      return @change_color_stocks << ary.flatten if piece(i+a,j+b).color?(my_color)
-      ary << [i+a,j+b]
-      check_line_if_turnable(i+a,j+b,a,b,ary)
+    def if_two_remain_get_better_move
+      if empty_cells.length == 2 && putable_cells.length == 2
+        better_move = []
+        next_turn
+        putable_cells.each{|i,j| better_move << [:better,i,j] }
+        next_turn
+        return better_move if better_move.length == 1
+      end
     end
 
     def within_range?(i,j)
