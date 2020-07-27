@@ -5,7 +5,8 @@ class Board
   Sub_Corner = [[0,1],[0,6],[1,0],[1,1],[1,6],[1,7],[6,0],[6,1],[6,6],[6,7],[7,1],[7,6]]
   Second_Corner = [[1,1],[1,6],[6,1],[6,6]]
   Four_corners = [[[0,0],[0,1],[1,0],[1,1]], [[0,6],[0,7],[1,6],[1,7]], [[6,0],[6,1],[7,0],[7,1]], [[6,6],[6,7],[7,6],[7,7]]]
-  Side = [[0,2],[0,3],[0,4],[0,5],[2,0],[2,7],[3,0],[3,7],[4,0],[4,7],[5,0],[5,7],[7,2],[7,3],[7,4],[7,5]]
+  # Side = [[0,2],[0,3],[0,4],[0,5],[2,0],[2,7],[3,0],[3,7],[4,0],[4,7],[5,0],[5,7],[7,2],[7,3],[7,4],[7,5]]
+  Side = [[[0,2],[0,3],[0,4],[0,5]],[[2,0],[3,0],[4,0],[5,0]],[[2,7],[3,7],[4,7],[5,7]],[[7,2],[7,3],[7,4],[7,5]]]
   Inner_Side = [[1,2],[1,3],[1,4],[1,5],[2,1],[2,6],[3,1],[3,6],[4,1],[4,6],[5,1],[5,6],[6,2],[6,3],[6,4],[6,5]]
   Around_the_piece = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]]
 
@@ -42,7 +43,8 @@ class Board
     sample = if_two_remain_get_better_move&.sample
     sample ||= only_one_corner_cell&.sample if closing_stage
     sample ||= turnable(Corner)&.sample
-    sample ||= get_min_inner_sides(turnable(Side))&.sample if middle_stage
+    sample ||= get_wing&.sample
+    sample ||= get_min_inner_sides(turnable(Side.flatten(1)))&.sample if middle_stage
     sample ||= turnable(Side)&.sample
     sample ||= (max_or_min_cells(Min, @min_cells_condition) & get_min_openness_cells).sample if early_stage || middle_stage
     sample ||= max_or_min_cells(Min, @min_cells_condition).sample if early_stage || middle_stage
@@ -52,18 +54,18 @@ class Board
 
   # より強い手を作成するための比較として使用
   def auto_put_request_v2
-    # sample = max_or_min_cells_v2(Max, @max_cells_condition).sample
-    # [sample[1]+1,sample[2]+1]
-
-    sample = if_two_remain_get_better_move&.sample
-    sample ||= only_one_corner_cell&.sample if closing_stage
-    sample ||= turnable(Corner)&.sample
-    sample ||= get_min_inner_sides(turnable(Side))&.sample if middle_stage
-    sample ||= turnable(Side)&.sample
-    sample ||= (max_or_min_cells(Min, @min_cells_condition) & get_min_openness_cells).sample if early_stage || middle_stage
-    sample ||= max_or_min_cells(Min, @min_cells_condition).sample if early_stage || middle_stage
-    sample ||= max_or_min_cells(Max, @max_cells_condition).sample if closing_stage
+    sample = max_or_min_cells_v2(Max, @max_cells_condition).sample
     [sample[1]+1,sample[2]+1]
+
+    # sample = if_two_remain_get_better_move&.sample
+    # sample ||= only_one_corner_cell&.sample if closing_stage
+    # sample ||= turnable(Corner)&.sample
+    # sample ||= get_min_inner_sides(turnable(Side))&.sample if middle_stage
+    # sample ||= turnable(Side)&.sample
+    # sample ||= (max_or_min_cells(Min, @min_cells_condition) & get_min_openness_cells).sample if early_stage || middle_stage
+    # sample ||= max_or_min_cells(Min, @min_cells_condition).sample if early_stage || middle_stage
+    # sample ||= max_or_min_cells(Max, @max_cells_condition).sample if closing_stage
+    # [sample[1]+1,sample[2]+1]
   end
 
   def putable_cells
@@ -264,12 +266,39 @@ class Board
 
     def if_two_remain_get_better_move
       if empty_cells.length == 2 && putable_cells.length == 2
-        better_move = []
+        both_can_put = []
         next_turn
-        putable_cells.each{|i,j| better_move << [:better,i,j] }
+        putable_cells.each{|i,j| both_can_put << [:better,i,j] }
         next_turn
-        return better_move if better_move.length == 1
+        return both_can_put if both_can_put.length == 1
       end
+    end
+
+    Upper = 0; Left = 1; Right = 2; Lower = 3
+    U_Left = 0; U_Right = 1; L_Left = 2; L_Right = 3
+    def get_wing
+      return if (Corner & empty_cells).length == 4
+      wing = []
+      Corner.each_with_index do |pi,idx|
+        if piece(pi[0],pi[1]).color?(enemy_color)
+          case idx
+          when U_Left
+            wing << [:wing, 0,1] if piece(0,1).color?(:none) && (Side[Upper] + [[0,6]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(0,7).color?(:none)
+            wing << [:wing, 1,0] if piece(1,0).color?(:none) && (Side[Left] + [[6,0]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(7,0).color?(:none)
+          when U_Right
+            wing << [:wing, 0,6] if piece(0,6).color?(:none) && (Side[Upper] + [[0,1]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(0,0).color?(:none)
+            wing << [:wing, 1,7] if piece(1,7).color?(:none) && (Side[Right] + [[6,7]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(7,7).color?(:none)
+          when L_Left
+            wing << [:wing, 6,0] if piece(6,0).color?(:none) && (Side[Left] + [[1,0]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(0,0).color?(:none)
+            wing << [:wing, 7,1] if piece(7,1).color?(:none) && (Side[Lower] + [[7,6]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(7,7).color?(:none)
+          when L_Right
+            wing << [:wing, 7,6] if piece(7,6).color?(:none) && (Side[Lower] + [[7,1]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(7,0).color?(:none)
+            wing << [:wing, 6,7] if piece(6,7).color?(:none) && (Side[Right] + [[1,7]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(0,7).color?(:none)
+          end
+        end
+      end
+      return nil if wing.empty?
+      wing.delete_if{|p| !able_to_put?(p[1],[2])}
     end
 
     def within_range?(i,j)
