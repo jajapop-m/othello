@@ -39,12 +39,12 @@ class Board
   end
 
   def auto_put_request
-    sample = only_one_corner_cell&.sample if empty_cells.length <= 20
+    sample = only_one_corner_cell&.sample if closing_stage
     sample ||= turnable(Corner)&.sample
     sample ||= turnable(Side)&.sample
-    sample ||= max_or_min_cells(Max, @max_cells_condition).sample if empty_cells.length <= 20
-    sample ||= (max_or_min_cells(Min, @min_cells_condition) & get_min_openness_cells).sample if empty_cells.length >= 42
-    sample ||= max_or_min_cells(Min, @min_cells_condition).sample if empty_cells.length >= 21
+    sample ||= max_or_min_cells(Max, @max_cells_condition).sample if closing_stage
+    sample ||= (max_or_min_cells(Min, @min_cells_condition) & get_min_openness_cells).sample if early_stage
+    sample ||= max_or_min_cells(Min, @min_cells_condition).sample if early_stage || middle_stage
     [sample[1]+1,sample[2]+1]
   end
 
@@ -52,12 +52,12 @@ class Board
     sample = max_or_min_cells_v2(Max, @max_cells_condition).sample
     [sample[1]+1,sample[2]+1]
 
-    # sample = only_one_corner_cell&.sample if empty_cells.length <= 20
+    # sample = only_one_corner_cell&.sample if closing_stage
     # sample ||= turnable(Corner)&.sample
     # sample ||= turnable(Side)&.sample
-    # sample ||= max_or_min_cells_v2(Max, @max_cells_condition).sample if empty_cells.length <= 20
-    # sample ||= (max_or_min_cells_v2(Min, @min_cells_condition) & get_min_openness_cells).sample if empty_cells.length >= 42
-    # sample ||= max_or_min_cells_v2(Min, @min_cells_condition).sample if empty_cells.length >= 21
+    # sample ||= max_or_min_cells_v2(Max, @max_cells_condition).sample if closing_stage
+    # sample ||= (max_or_min_cells_v2(Min, @min_cells_condition) & get_min_openness_cells).sample if early_stage
+    # sample ||= max_or_min_cells_v2(Min, @min_cells_condition).sample if early_stage || middle_stage
     # [sample[1]+1,sample[2]+1]
   end
 
@@ -132,6 +132,18 @@ class Board
   end
 
   private
+
+    def early_stage
+      empty_cells.length >= 42
+    end
+
+    def middle_stage
+      empty_cells.length <= 41 && empty_cells.length >= 21
+    end
+
+    def closing_stage
+      empty_cells.length <= 20
+    end
 
     def piece(i,j)
       all_pieces[i][j] if within_range?(i,j)
