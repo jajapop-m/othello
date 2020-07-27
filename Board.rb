@@ -48,6 +48,7 @@ class Board
     [sample[1]+1,sample[2]+1]
   end
 
+  # より強い手を作成するための比較として使用
   def auto_put_request_v2
     sample = max_or_min_cells_v2(Max, @max_cells_condition).sample
     [sample[1]+1,sample[2]+1]
