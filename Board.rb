@@ -3,7 +3,7 @@ class Board
   Min, Max = 64, 0
   Corner = [[0,0],[0,7],[7,0],[7,7]]
   Side = [[0,2],[0,3],[0,4],[0,5],[2,0],[2,7],[3,0],[3,7],[4,0],[4,7],[5,0],[5,7],[7,2],[7,3],[7,4],[7,5]]
-  Sub_Corner = [[1,1],[1,6],[6,1],[6,7]]
+  Sub_Corner = [[0,1],[0,6],[1,0],[1,1],[1,6],[1,7],[6,0],[6,1],[6,6],[6,7],[7,1],[7,6]]
   Around_the_piece = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]]
 
   def initialize
@@ -53,9 +53,9 @@ class Board
 
     sample = turnable(Corner)&.sample
     sample ||= turnable(Side)&.sample
-    sample ||= max_or_min_cells(Max, @max_cells_condition).sample if empty_cells.length <= 20
-    sample ||= (max_or_min_cells(Min, @min_cells_condition) & get_min_openness_cells).sample if empty_cells.length >= 42
-    sample ||= max_or_min_cells(Min, @min_cells_condition).sample if empty_cells.length >= 21
+    sample ||= max_or_min_cells_v2(Max, @max_cells_condition).sample if empty_cells.length <= 20
+    sample ||= (max_or_min_cells_v2(Min, @min_cells_condition) & get_min_openness_cells).sample if empty_cells.length >= 42
+    sample ||= max_or_min_cells_v2(Min, @min_cells_condition).sample if empty_cells.length >= 21
     [sample[1]+1,sample[2]+1]
   end
 
@@ -152,7 +152,7 @@ class Board
 
     def max_or_min_cells_v2(i,proc)
       @cells = [i]
-      empties = empty_cells - Sub_Corner2
+      empties = empty_cells - Sub_Corner
       empties = empty_cells if (putable_cells & empties).empty?
       empties.each do |i,j|
         @turnable_num = numbers_of_turnable_pieces(i,j)
