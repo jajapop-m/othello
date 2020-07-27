@@ -4,6 +4,7 @@ class Board
   Corner = [[0,0],[0,7],[7,0],[7,7]]
   Side = [[0,2],[0,3],[0,4],[0,5],[2,0],[2,7],[3,0],[3,7],[4,0],[4,7],[5,0],[5,7],[7,2],[7,3],[7,4],[7,5]]
   Sub_Corner = [[0,1],[0,6],[1,0],[1,1],[1,6],[1,7],[6,0],[6,1],[6,6],[6,7],[7,1],[7,6]]
+  Second_Corner = [[1,1],[1,6],[6,1],[6,6]]
   Around_the_piece = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]]
 
   def initialize
@@ -51,17 +52,17 @@ class Board
 
   # より強い手を作成するための比較として使用
   def auto_put_request_v2
-    sample = max_or_min_cells_v2(Max, @max_cells_condition).sample
-    [sample[1]+1,sample[2]+1]
-
-    # sample = only_one_corner_cell&.sample if closing_stage
-    # sample ||= turnable(Corner)&.sample
-    # sample ||= get_min_inner_sides(turnable(Side))&.sample if middle_stage
-    # sample ||= turnable(Side)&.sample
-    # sample ||= (max_or_min_cells(Min, @min_cells_condition) & get_min_openness_cells).sample if early_stage || middle_stage
-    # sample ||= max_or_min_cells(Min, @min_cells_condition).sample if early_stage || middle_stage
-    # sample ||= max_or_min_cells(Max, @max_cells_condition).sample if closing_stage
+    # sample = max_or_min_cells_v2(Max, @max_cells_condition).sample
     # [sample[1]+1,sample[2]+1]
+
+    sample = only_one_corner_cell&.sample if closing_stage
+    sample ||= turnable(Corner)&.sample
+    sample ||= get_min_inner_sides(turnable(Side))&.sample if middle_stage
+    sample ||= turnable(Side)&.sample
+    sample ||= (max_or_min_cells(Min, @min_cells_condition) & get_min_openness_cells).sample if early_stage || middle_stage
+    sample ||= max_or_min_cells(Min, @min_cells_condition).sample if early_stage || middle_stage
+    sample ||= max_or_min_cells(Max, @max_cells_condition).sample if closing_stage
+    [sample[1]+1,sample[2]+1]
   end
 
   def putable_cells
@@ -155,6 +156,7 @@ class Board
     def max_or_min_cells(i,proc)
       @cells = [i]
       empties = empty_cells - Sub_Corner
+      empties = empty_cells - Second_Corner if (putable_cells & empties).empty?
       empties = empty_cells if (putable_cells & empties).empty?
       empties.each do |i,j|
         @turnable_num = numbers_of_turnable_pieces(i,j)
@@ -169,8 +171,9 @@ class Board
 
     def max_or_min_cells_v2(i,proc)
       @cells = [i]
-      # empties = empty_cells - Sub_Corner
-      empties = empty_cells #if (putable_cells & empties).empty?
+      empties = empty_cells - Sub_Corner
+      empties = empty_cells - Second_Corner if (putable_cells & empties).empty?
+      empties = empty_cells if (putable_cells & empties).empty?
       empties.each do |i,j|
         @turnable_num = numbers_of_turnable_pieces(i,j)
         if proc.call
