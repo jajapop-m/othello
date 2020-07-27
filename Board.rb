@@ -283,22 +283,49 @@ class Board
         if piece(pi[0],pi[1]).color?(enemy_color)
           case idx
           when U_Left
-            wing << [:wing, 0,1] if piece(0,1).color?(:none) && (Side[Upper] + [[0,6]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(0,7).color?(:none)
-            wing << [:wing, 1,0] if piece(1,0).color?(:none) && (Side[Left] + [[6,0]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(7,0).color?(:none)
+            # wing << [:wing, 0,1] if piece(0,1).color?(:none) && (Side[Upper] + [[0,6]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(0,7).color?(:none)
+            wing << [:wing, 0,1] if wing?(0,1)
+            # wing << [:wing, 1,0] if piece(1,0).color?(:none) && (Side[Left] + [[6,0]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(7,0).color?(:none)
+            wing << [:wing, 1,0] if wing?(1,0)
           when U_Right
-            wing << [:wing, 0,6] if piece(0,6).color?(:none) && (Side[Upper] + [[0,1]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(0,0).color?(:none)
-            wing << [:wing, 1,7] if piece(1,7).color?(:none) && (Side[Right] + [[6,7]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(7,7).color?(:none)
+            # wing << [:wing, 0,6] if piece(0,6).color?(:none) && (Side[Upper] + [[0,1]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(0,0).color?(:none)
+            wing << [:wing, 0,6] if wing?(0,6)
+            # wing << [:wing, 1,7] if piece(1,7).color?(:none) && (Side[Right] + [[6,7]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(7,7).color?(:none)
+            wing << [:wing, 1,7] if wing?(1,7)
           when L_Left
-            wing << [:wing, 6,0] if piece(6,0).color?(:none) && (Side[Left] + [[1,0]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(0,0).color?(:none)
-            wing << [:wing, 7,1] if piece(7,1).color?(:none) && (Side[Lower] + [[7,6]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(7,7).color?(:none)
+            # wing << [:wing, 6,0] if piece(6,0).color?(:none) && (Side[Left] + [[1,0]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(0,0).color?(:none)
+            wing << [:wing, 6,0] if wing?(6,0)
+            # wing << [:wing, 7,1] if piece(7,1).color?(:none) && (Side[Lower] + [[7,6]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(7,7).color?(:none)
+            wing << [:wing, 7,1] if wing?(7,1)
           when L_Right
-            wing << [:wing, 7,6] if piece(7,6).color?(:none) && (Side[Lower] + [[7,1]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(7,0).color?(:none)
-            wing << [:wing, 6,7] if piece(6,7).color?(:none) && (Side[Right] + [[1,7]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(0,7).color?(:none)
+            # wing << [:wing, 7,6] if piece(7,6).color?(:none) && (Side[Lower] + [[7,1]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(7,0).color?(:none)
+            wing << [:wing, 7,6] if wing?(7,6)
+            # wing << [:wing, 6,7] if piece(6,7).color?(:none) && (Side[Right] + [[1,7]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(0,7).color?(:none)
+            wing << [:wing, 6,7] if wing?(6,7)
           end
         end
       end
       return nil if wing.empty?
       wing.delete_if{|p| !able_to_put?(p[1],[2])}
+    end
+
+    def wing?(i,j)
+      return false unless piece(i,j).color?(:none) || within_range?(i,j)
+      [[0,-1,0,6,:+],[-1,0,6,0,:+],[0,1,0,-6,:-],[1,0,-6,0,:-]].each do |k,l,m,n,cal|
+        if Corner.include?([i+k,j+l]) && piece(i+m,j+n).color?(:none)
+          if k == 0
+            (1..5).each {|b|
+              p [k,[i,j],[i,j.send(cal,b)]]
+               return false unless piece(i,j.send(cal,b)).color?(enemy_color)}
+          end
+          if k != 0
+            (1..5).each {|a|
+              p [k,[i,j],[i.send(cal,a),j]]
+              return false unless piece(i.send(cal,a),j).color?(enemy_color)}
+          end
+          return true
+        end
+      end
     end
 
     def within_range?(i,j)
