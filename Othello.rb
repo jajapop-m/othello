@@ -13,8 +13,8 @@ class Othello
     def mode_select
       puts "どれにしますか？番号を入力して下さい"
       puts "1.人対コンピュータ, 2.人対人, 3.コンピュータ対コンピュータ"
-      # i = gets.to_i
-      i = 3
+      i = gets.to_i
+      # i = 3
       exit if board.black_win + board.white_win + board.even > 200
       case i
       when 1
@@ -24,8 +24,8 @@ class Othello
         man_vs_man
       when 3
         puts_field
-        # computer_vs_computer
-        computer_vs_computer2
+        computer_vs_computer
+        # computer_vs_computer2
       else
         puts "もう一度入力して下さい。"
         mode_select
@@ -105,9 +105,9 @@ class Othello
 
     def after_put_piece
       board.next_turn
-      # puts_current_situation
+      puts_current_situation
       if_gameover_puts_result
-      # puts_field
+      puts_field
     end
 
     def puts_current_situation
@@ -168,8 +168,8 @@ class Othello
       puts "黒#{board.black_win},白#{board.white_win},引き分け#{board.even}"
       puts "もう一度プレイしますか？"
       puts "1 はい, 2 いいえ (番号を入力して下さい)"
-      # i = gets.to_i
-      i = 1
+      i = gets.to_i
+      # i = 1
       case i
       when 1
         board.game_init
