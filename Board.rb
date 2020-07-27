@@ -39,7 +39,8 @@ class Board
   end
 
   def auto_put_request
-    sample = turnable(Corner)&.sample
+    sample = only_one_corner_cell&.sample if empty_cells.length <= 20
+    sample ||= turnable(Corner)&.sample
     sample ||= turnable(Side)&.sample
     sample ||= max_or_min_cells(Max, @max_cells_condition).sample if empty_cells.length <= 20
     sample ||= (max_or_min_cells(Min, @min_cells_condition) & get_min_openness_cells).sample if empty_cells.length >= 42
@@ -48,15 +49,16 @@ class Board
   end
 
   def auto_put_request_v2
-    # sample = max_or_min_cells_v2(Max, @max_cells_condition).sample
-    # [sample[1]+1,sample[2]+1]
-
-    sample = turnable(Corner)&.sample
-    sample ||= turnable(Side)&.sample
-    sample ||= max_or_min_cells_v2(Max, @max_cells_condition).sample if empty_cells.length <= 20
-    sample ||= (max_or_min_cells_v2(Min, @min_cells_condition) & get_min_openness_cells).sample if empty_cells.length >= 42
-    sample ||= max_or_min_cells_v2(Min, @min_cells_condition).sample if empty_cells.length >= 21
+    sample = max_or_min_cells_v2(Max, @max_cells_condition).sample
     [sample[1]+1,sample[2]+1]
+
+    # sample = only_one_corner_cell&.sample if empty_cells.length <= 20
+    # sample ||= turnable(Corner)&.sample
+    # sample ||= turnable(Side)&.sample
+    # sample ||= max_or_min_cells_v2(Max, @max_cells_condition).sample if empty_cells.length <= 20
+    # sample ||= (max_or_min_cells_v2(Min, @min_cells_condition) & get_min_openness_cells).sample if empty_cells.length >= 42
+    # sample ||= max_or_min_cells_v2(Min, @min_cells_condition).sample if empty_cells.length >= 21
+    # [sample[1]+1,sample[2]+1]
   end
 
   def putable_cells
@@ -152,8 +154,8 @@ class Board
 
     def max_or_min_cells_v2(i,proc)
       @cells = [i]
-      empties = empty_cells - Sub_Corner
-      empties = empty_cells if (putable_cells & empties).empty?
+      # empties = empty_cells - Sub_Corner
+      empties = empty_cells #if (putable_cells & empties).empty?
       empties.each do |i,j|
         @turnable_num = numbers_of_turnable_pieces(i,j)
         if proc.call
@@ -163,6 +165,17 @@ class Board
       end
       m = @cells.shift
       @cells.delete_if{|cell| cell[0]!=m}
+    end
+
+    def only_one_corner_cell
+      only_one_corner = []
+      four_corner = [[[0,0],[0,1],[1,0],[1,1]], [[0,6],[0,7],[1,6],[1,7]], [[6,0],[6,1],[7,0],[7,1]], [[6,6],[6,7],[7,6],[7,7]]]
+      four_corner.each do |corner|
+        only_one_corner << (corner & empty_cells).map{|a| a.unshift(:only_one)}
+      end
+      only_one_corner.delete_if{|p| p.length != 1}
+      only_one_corner.each {|piece| piece.delete_if {|p| !able_to_put?(p[1],p[2])}}
+      only_one_corner.compact.flatten(1)
     end
 
     def sum_openness(i,j)
