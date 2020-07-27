@@ -41,25 +41,25 @@ class Board
   def auto_put_request
     sample = only_one_corner_cell&.sample if closing_stage
     sample ||= turnable(Corner)&.sample
-    sample ||= turnable(Side)&.sample
-    sample ||= max_or_min_cells(Max, @max_cells_condition).sample if closing_stage
-    sample ||= (max_or_min_cells(Min, @min_cells_condition) & get_min_openness_cells).sample if early_stage
+    sample ||= get_min_inner_sides(turnable(Side))&.sample
+    sample ||= (max_or_min_cells(Min, @min_cells_condition) & get_min_openness_cells).sample if early_stage || middle_stage
     sample ||= max_or_min_cells(Min, @min_cells_condition).sample if early_stage || middle_stage
+    sample ||= max_or_min_cells(Max, @max_cells_condition).sample if closing_stage
     [sample[1]+1,sample[2]+1]
   end
 
   # より強い手を作成するための比較として使用
   def auto_put_request_v2
-    sample = max_or_min_cells_v2(Max, @max_cells_condition).sample
-    [sample[1]+1,sample[2]+1]
-
-    # sample = only_one_corner_cell&.sample if closing_stage
-    # sample ||= turnable(Corner)&.sample
-    # sample ||= turnable(Side)&.sample
-    # sample ||= max_or_min_cells_v2(Max, @max_cells_condition).sample if closing_stage
-    # sample ||= (max_or_min_cells_v2(Min, @min_cells_condition) & get_min_openness_cells).sample if early_stage
-    # sample ||= max_or_min_cells_v2(Min, @min_cells_condition).sample if early_stage || middle_stage
+    # sample = max_or_min_cells_v2(Max, @max_cells_condition).sample
     # [sample[1]+1,sample[2]+1]
+
+    sample = only_one_corner_cell&.sample if closing_stage
+    sample ||= turnable(Corner)&.sample
+    sample ||= turnable(Side)&.sample
+    sample ||= (max_or_min_cells(Min, @min_cells_condition) & get_min_openness_cells).sample if early_stage || middle_stage
+    sample ||= max_or_min_cells(Min, @min_cells_condition).sample if early_stage || middle_stage
+    sample ||= max_or_min_cells(Max, @max_cells_condition).sample if closing_stage
+    [sample[1]+1,sample[2]+1]
   end
 
   def putable_cells
@@ -193,8 +193,10 @@ class Board
 
     def sum_openness(i,j)
       sum = 0
-      turnable_pieces(i,j).each do |a,b|
-        sum += piece(a,b).openness
+      turnable_pieces(i,j).each do |line|
+        line.each_slice(2) do |a,b|
+          sum += piece(a,b).openness
+        end
       end
       sum
     end
@@ -231,6 +233,22 @@ class Board
       end
       return nil if corners_or_sides.empty?
       corners_or_sides
+    end
+
+    Inner_Side = [[1,2],[1,3],[1,4],[1,5],[2,1],[2,6],[3,1],[3,6],[4,1],[4,6],[5,1],[5,6],[6,2],[6,3],[6,4],[6,5]]
+    def get_min_inner_sides(sides)
+      return nil if sides.nil?
+      min = 16
+      stock = []
+      sides.each do |_,i,j|
+        count = 17
+        turnable_pieces(i,j).each do |piece|
+          count += 1 if Inner_Side.include?(piece)
+        end
+        min = [min, count].min
+        stock << [count,i,j]
+      end
+      stock.delete_if{|piece| piece[0] != min}
     end
 
     def check_line_if_turnable(i,j,a,b,ary)
