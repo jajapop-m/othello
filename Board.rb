@@ -287,16 +287,8 @@ class Board
       return false unless piece(i,j).color?(:none) || within_range?(i,j)
       [[0,-1,0,6,:+],[-1,0,6,0,:+],[0,1,0,-6,:-],[1,0,-6,0,:-]].each do |k,l,m,n,cal|
         if Corner.include?([i+k,j+l]) && piece(i+m,j+n).color?(:none)
-          if k == 0
-            (1..5).each {|b|
-              p [k,[i,j],[i,j.send(cal,b)]]
-               return false unless piece(i,j.send(cal,b)).color?(enemy_color)}
-          end
-          if k != 0
-            (1..5).each {|a|
-              p [k,[i,j],[i.send(cal,a),j]]
-              return false unless piece(i.send(cal,a),j).color?(enemy_color)}
-          end
+          (1..5).each {|a| return false unless piece(i.send(cal,a),j).color?(enemy_color)} if k != 0
+          (1..5).each {|b| return false unless piece(i,j.send(cal,b)).color?(enemy_color)} if k == 0
           return true
         end
       end
