@@ -278,8 +278,9 @@ class Board
       return if (Corner & empty_cells).length == 4
       wing = []
       (Sub_Corner - Second_Corner).each {|i,j| wing << [:wing, i,j] if wing?(i,j)}
-      return nil if wing.empty?
       wing.delete_if{|p| !able_to_put?(p[1],[2])}
+      return if wing.empty?
+      wing
     end
 
     def wing?(i,j)
