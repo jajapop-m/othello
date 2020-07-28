@@ -89,6 +89,7 @@ class Othello
       print "縦 横: "
       i,j = gets.split
       return ask_retire? if i == "end" || i == "exit"
+      return board.get_back_one_step if i == "back"
       if i.nil? || j.nil?
         puts "もう一度入力して下さい"
         return put_request
@@ -185,14 +186,14 @@ class Othello
 
     def ask_retire?
       puts "本当にゲームを終了しますか？"
-      puts "1 はい, 2 いいえ (番号を入力して下さい)"
+      puts "1 いいえ, 2 はい (番号を入力して下さい)"
       i = gets.to_i
       case i
       when 1
-        ask_continue?
-      when 2
         puts_field
         put_request
+      when 2
+        ask_continue?
       else
         puts "もう一度入力して下さい"
         ask_retire?
