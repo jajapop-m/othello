@@ -160,6 +160,7 @@ class Board
       @cells = [i]
       empties = empty_cells - Sub_Corner
       empties = empty_cells - Second_Corner if (putable_cells & empties).empty?
+      empties = empty_cells - Second_Corner if (putable_cells & empties).empty?
       empties = empty_cells if (putable_cells & empties).empty?
       empties.each do |i,j|
         @turnable_num = numbers_of_turnable_pieces(i,j)
@@ -170,6 +171,10 @@ class Board
       end
       m = @cells.shift
       @cells.delete_if{|cell| cell[0]!=m}
+    end
+
+    def avoide_robbed_corner
+
     end
 
     def max_or_min_cells_v2(i,proc)
@@ -286,7 +291,7 @@ class Board
     def wing?(i,j)
       return false unless piece(i,j).color?(:none) || within_range?(i,j)
       [[0,-1,0,6,:+],[-1,0,6,0,:+],[0,1,0,-6,:-],[1,0,-6,0,:-]].each do |k,l,m,n,cal|
-        if Corner.include?([i+k,j+l]) && piece(i+m,j+n).color?(:none)
+        if Corner.include?([i+k,j+l]) && piece(i+k,j+l).color?(enemy_color) && piece(i+m,j+n).color?(:none)
           (1..5).each {|a| return false unless piece(i.send(cal,a),j).color?(enemy_color)} if k != 0
           (1..5).each {|b| return false unless piece(i,j.send(cal,b)).color?(enemy_color)} if k == 0
           return true
@@ -298,6 +303,28 @@ class Board
     def within_range?(i,j)
       i<8 && j<8 && i>=0 && j>=0
     end
+end
+
+class Range
+  def check_right_side_color(i,j,color)
+    self.each {|r| return false unless piece(i,j+1).color?(color)}
+    true
+  end
+
+  def check_left_side_color(i,j,color)
+    self.each {|r| return false unless piece(i,j-1).color?(color)}
+    true
+  end
+
+  def check_down_side_color(i,j,color)
+    self.each {|r| return false unless piece(i+1,j).color?(color)}
+    true
+  end
+
+  def check_up_side_color(i,j,color)
+    self.each {|r| return false unless piece(i-1,j).color?(color)}
+    true
+  end
 end
 
 class Piece
