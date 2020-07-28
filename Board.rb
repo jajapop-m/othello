@@ -279,32 +279,7 @@ class Board
     def get_wing
       return if (Corner & empty_cells).length == 4
       wing = []
-      Corner.each_with_index do |pi,idx|
-        if piece(pi[0],pi[1]).color?(enemy_color)
-          case idx
-          when U_Left
-            # wing << [:wing, 0,1] if piece(0,1).color?(:none) && (Side[Upper] + [[0,6]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(0,7).color?(:none)
-            wing << [:wing, 0,1] if wing?(0,1)
-            # wing << [:wing, 1,0] if piece(1,0).color?(:none) && (Side[Left] + [[6,0]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(7,0).color?(:none)
-            wing << [:wing, 1,0] if wing?(1,0)
-          when U_Right
-            # wing << [:wing, 0,6] if piece(0,6).color?(:none) && (Side[Upper] + [[0,1]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(0,0).color?(:none)
-            wing << [:wing, 0,6] if wing?(0,6)
-            # wing << [:wing, 1,7] if piece(1,7).color?(:none) && (Side[Right] + [[6,7]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(7,7).color?(:none)
-            wing << [:wing, 1,7] if wing?(1,7)
-          when L_Left
-            # wing << [:wing, 6,0] if piece(6,0).color?(:none) && (Side[Left] + [[1,0]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(0,0).color?(:none)
-            wing << [:wing, 6,0] if wing?(6,0)
-            # wing << [:wing, 7,1] if piece(7,1).color?(:none) && (Side[Lower] + [[7,6]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(7,7).color?(:none)
-            wing << [:wing, 7,1] if wing?(7,1)
-          when L_Right
-            # wing << [:wing, 7,6] if piece(7,6).color?(:none) && (Side[Lower] + [[7,1]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(7,0).color?(:none)
-            wing << [:wing, 7,6] if wing?(7,6)
-            # wing << [:wing, 6,7] if piece(6,7).color?(:none) && (Side[Right] + [[1,7]]).all?{|p| piece(p[0],p[1]).color?(enemy_color)} && piece(0,7).color?(:none)
-            wing << [:wing, 6,7] if wing?(6,7)
-          end
-        end
-      end
+      (Sub_Corner - Second_Corner).each {|i,j| wing << [:wing, i,j] if wing?(i,j)}
       return nil if wing.empty?
       wing.delete_if{|p| !able_to_put?(p[1],[2])}
     end
