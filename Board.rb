@@ -274,8 +274,6 @@ class Board
       end
     end
 
-    Upper = 0; Left = 1; Right = 2; Lower = 3
-    U_Left = 0; U_Right = 1; L_Left = 2; L_Right = 3
     def get_wing
       return if (Corner & empty_cells).length == 4
       wing = []
