@@ -305,28 +305,6 @@ class Board
     end
 end
 
-class Range
-  def check_right_side_color(i,j,color)
-    self.each {|r| return false unless piece(i,j+1).color?(color)}
-    true
-  end
-
-  def check_left_side_color(i,j,color)
-    self.each {|r| return false unless piece(i,j-1).color?(color)}
-    true
-  end
-
-  def check_down_side_color(i,j,color)
-    self.each {|r| return false unless piece(i+1,j).color?(color)}
-    true
-  end
-
-  def check_up_side_color(i,j,color)
-    self.each {|r| return false unless piece(i-1,j).color?(color)}
-    true
-  end
-end
-
 class Piece
   attr_accessor :color, :openness
   def initialize
