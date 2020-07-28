@@ -292,6 +292,7 @@ class Board
           return true
         end
       end
+      false
     end
 
     def within_range?(i,j)
