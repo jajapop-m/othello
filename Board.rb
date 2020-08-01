@@ -5,7 +5,6 @@ class Board
   Sub_Corner = [[0,1],[0,6],[1,0],[1,1],[1,6],[1,7],[6,0],[6,1],[6,6],[6,7],[7,1],[7,6]]
   Second_Corner = [[1,1],[1,6],[6,1],[6,6]]
   Four_corners = [[[0,0],[0,1],[1,0],[1,1]], [[0,6],[0,7],[1,6],[1,7]], [[6,0],[6,1],[7,0],[7,1]], [[6,6],[6,7],[7,6],[7,7]]]
-  # Side = [[0,2],[0,3],[0,4],[0,5],[2,0],[2,7],[3,0],[3,7],[4,0],[4,7],[5,0],[5,7],[7,2],[7,3],[7,4],[7,5]]
   Side = [[[0,2],[0,3],[0,4],[0,5]],[[2,0],[3,0],[4,0],[5,0]],[[2,7],[3,7],[4,7],[5,7]],[[7,2],[7,3],[7,4],[7,5]]]
   Inner_Side = [[1,2],[1,3],[1,4],[1,5],[2,1],[2,6],[3,1],[3,6],[4,1],[4,6],[5,1],[5,6],[6,2],[6,3],[6,4],[6,5]]
   Around_the_piece = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]]
@@ -31,7 +30,7 @@ class Board
         all_cells << [i,j]
       end
     end
-    (center_b + center_w).each {|i,j| empty_cells.remove_from_empty_cells(i,j)}
+    (center_b + center_w).each {|i,j| empty_cells.remove_cells(i,j)}
     (center_b + center_w).each {|i,j| piece(i,j).openness = 5}
   end
 
@@ -82,7 +81,7 @@ class Board
     turnable_pieces(i,j).each do |line|
       line.each_slice(2) {|i,j| piece(i,j).color = my_color }
     end
-    empty_cells.remove_from_empty_cells(i,j)
+    empty_cells.remove_cells(i,j)
   end
 
   def able_to_put?(i,j)
@@ -173,10 +172,7 @@ class Board
       @cells.delete_if{|cell| cell[0]!=m}
     end
 
-    def avoide_robbed_corner
-
-    end
-
+  # より強い手を作成するための比較として使用
     def max_or_min_cells_v2(i,proc)
       @cells = [i]
       # empties = empty_cells - Sub_Corner
@@ -318,7 +314,7 @@ class Piece
 end
 
 class Array
-  def remove_from_empty_cells(i,j)
+  def remove_cells(i,j)
     self.delete([i,j])
   end
 end
